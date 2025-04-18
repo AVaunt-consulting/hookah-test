@@ -16,7 +16,7 @@
       <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">How to use</h2>
       <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
         <li>Go to the <a href="/generate" class="text-blue-600 dark:text-blue-400 hover:underline">Generate URL</a> page</li>
-        <li>Copy your unique webhook URL and paste the URL on the Hookah website</li>
+        <li>Copy your unique webhook URL and paste the URL on the <a href="https://app.hookah.ing/" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">Hookah</a> website</li>
         <li>Configure your service to send webhooks to this URL</li>
         <li>View incoming webhook requests in real-time</li>
       </ul>
