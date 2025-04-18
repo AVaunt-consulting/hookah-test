@@ -132,8 +132,8 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <div class="ml-3 flex-1">
-          <p class="text-sm font-medium text-gray-900 dark:text-white">
+        <div class="ml-3 flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
             {event.eventName} <span class="text-gray-500 dark:text-gray-400 text-xs group relative">
               <span title={fullEmitter}>({truncatedEmitter})</span>
             </span>
@@ -142,8 +142,9 @@
             <div class="text-sm text-gray-600 dark:text-gray-300">
               <span class="font-medium">Amount:</span> {amount}
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-300">
-              <span class="font-medium">Message:</span> {message}
+            <div class="text-sm text-gray-600 dark:text-gray-300 break-words">
+              <span class="font-medium">Message:</span> 
+              <span class="inline-block max-w-full">{message}</span>
             </div>
             <div class="flex justify-end">
               <span class="inline-flex rounded-md text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">

@@ -57,7 +57,7 @@
       {#if toast.event}
         {@const notificationEvent = convertToNotificationEvent(toast.event)}
         {#if notificationEvent}
-          <div class="transform transition-all duration-300 ease-in-out max-w-md w-full" 
+          <div class="transform transition-all duration-300 ease-in-out max-w-xl w-full" 
               class:opacity-0={!toast.visible} 
               class:translate-x-full={!toast.visible}>
             <WebhookNotification 
