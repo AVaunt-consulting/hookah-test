@@ -56,9 +56,13 @@
     try {
       // Get the latest webhook event
       const events = get(webhookEvents);
-      if (events.length === 0) return undefined;
+      if (events.length === 0) {
+        console.log('Debug: No events found in webhookEvents store');
+        return undefined;
+      }
       
       const latestEvent = events[0];
+      console.log('Debug: Latest event:', latestEvent);
       
       // Check if it has a message property at the root level
       if (latestEvent.body && 
@@ -66,6 +70,7 @@
           'message' in latestEvent.body) {
         
         const message = latestEvent.body.message;
+        console.log('Debug: Found message property:', message);
         
         // Handle structure like { message: { content: { value: "Text" } } }
         if (message && typeof message === 'object' && 
@@ -73,13 +78,20 @@
             message.content && 
             typeof message.content === 'object' && 
             'value' in message.content) {
-          return String(message.content.value);
+          const messageValue = String(message.content.value);
+          console.log('Debug: Extracted message value:', messageValue);
+          return messageValue;
         }
         
         // Direct string value
         if (typeof message === 'string') {
+          console.log('Debug: Message is a direct string:', message);
           return message;
         }
+
+        console.log('Debug: Message found but structure not recognized:', message);
+      } else {
+        console.log('Debug: No message property found in event body:', latestEvent.body);
       }
       
       return undefined;
@@ -89,9 +101,13 @@
     }
   }
   
+  // Direct debug for current event
+  $: console.log('Debug: Current event being rendered:', event);
+  
   // Generate a message from event data or root message
   $: rootMessage = getRootMessage();
   $: message = event.message || rootMessage || generateMessage(event);
+  $: console.log('Debug: Final message being displayed:', message, 'from sources - event.message:', event.message, 'rootMessage:', rootMessage);
   
   function generateMessage(evt: Event): string {
     // Try to generate a meaningful message from the event data
@@ -144,7 +160,7 @@
             </div>
             <div class="text-sm text-gray-600 dark:text-gray-300 break-words">
               <span class="font-medium">Message:</span> 
-              <span class="inline-block max-w-full">{message}</span>
+              <span class="inline-block max-w-full">{message || "No message found"}</span>
             </div>
             <div class="flex justify-end">
               <span class="inline-flex rounded-md text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">

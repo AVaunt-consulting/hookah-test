@@ -6,19 +6,16 @@
   let uniqueId = '';
   let curlCommand = '';
   let isUrlGenerated = false;
-  let protocol = 'http';
 
   onMount(() => {
-    // Check for saved uniqueId in localStorage
-    if (typeof window !== 'undefined') {
-      const savedUniqueId = localStorage.getItem('webhookUniqueId');
-      if (savedUniqueId) {
-        uniqueId = savedUniqueId;
-        const baseUrl = window.location.origin;
-        webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
-        updateCurlCommand();
-        isUrlGenerated = true;
-      }
+    // Check if we have a saved webhook URL in localStorage
+    const savedUniqueId = localStorage.getItem('webhookUniqueId');
+    if (savedUniqueId) {
+      uniqueId = savedUniqueId;
+      const baseUrl = window.location.origin;
+      webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
+      updateCurlCommand();
+      isUrlGenerated = true;
     }
   });
 
@@ -28,9 +25,7 @@
     webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
     
     // Save to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('webhookUniqueId', uniqueId);
-    }
+    localStorage.setItem('webhookUniqueId', uniqueId);
     
     updateCurlCommand();
     isUrlGenerated = true;
@@ -67,16 +62,6 @@
         copied = false;
       }, 2000);
     });
-  }
-
-  function handleSubmit() {
-    if (uniqueId) {
-      // Store uniqueId in localStorage for future use
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('webhookUniqueId', uniqueId);
-      }
-      window.location.href = `/requests?id=${uniqueId}`;
-    }
   }
 </script>
 
