@@ -26,6 +26,8 @@ export function addToast(webhookEvent: WebhookEvent) {
   const payload = webhookEvent.body as { events: WebhookEventData[] };
   
   // Only process the first event in the webhook payload
+  // This is intentional - we only want to show one notification per webhook,
+  // even if the webhook contains multiple events
   if (payload.events && payload.events.length > 0) {
     const event = payload.events[0]; // Get only the first event
     
