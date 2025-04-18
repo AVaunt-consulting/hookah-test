@@ -62,6 +62,7 @@
 					<a href="/" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Home</a>
 					<a href="/generate" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Generate URL</a>
 					<a href="/requests" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Requests</a>
+					<a href="/radix-test" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Radix Test</a>
 				</nav>
 			</div>
 		</div>
