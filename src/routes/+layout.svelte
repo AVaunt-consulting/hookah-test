@@ -2,20 +2,51 @@
 	import '../app.css';
 	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import { onMount } from 'svelte';
-	import { fetchWebhookEvents } from '$lib/stores/webhookStore';
+	import { fetchWebhookEvents, isPollingEnabled } from '$lib/stores/webhookStore';
+	
+	let intervalId: number | undefined;
 	
 	onMount(() => {
 		// Initial fetch
 		fetchWebhookEvents();
 		
-		// Set up polling every 5 seconds
-		const interval = setInterval(() => {
-			fetchWebhookEvents();
-		}, 5000);
+		// Create function to check if polling should be active
+		function updatePolling() {
+			if (isPollingEnabled()) {
+				// If polling is enabled but no interval, start it
+				if (!intervalId) {
+					console.log('Layout: Starting global polling');
+					intervalId = setInterval(() => {
+						if (isPollingEnabled()) {
+							fetchWebhookEvents();
+						}
+					}, 5000);
+				}
+			} else {
+				// If polling is disabled but interval exists, clear it
+				if (intervalId) {
+					console.log('Layout: Stopping global polling');
+					clearInterval(intervalId);
+					intervalId = undefined;
+				}
+			}
+		}
+		
+		// Initial setup
+		updatePolling();
+		
+		// Watch for changes to the pollingEnabled setting in localStorage
+		window.addEventListener('storage', (event) => {
+			if (event.key === 'pollingEnabled') {
+				updatePolling();
+			}
+		});
 		
 		// Clear interval on component unmount
 		return () => {
-			clearInterval(interval);
+			if (intervalId) {
+				clearInterval(intervalId);
+			}
 		};
 	});
 </script>

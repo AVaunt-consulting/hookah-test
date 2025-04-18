@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
-  import { webhookEvents, isLoading, error, fetchWebhookEvents, clearWebhookEvents } from '$lib/stores/webhookStore';
+  import { webhookEvents, isLoading, error, fetchWebhookEvents, clearWebhookEvents, isPollingEnabled } from '$lib/stores/webhookStore';
   import type { WebhookEvent } from '../api/webhook/+server';
   import WebhookEntry from '$lib/components/WebhookEntry.svelte';
   import { toasts } from '$lib/stores/toastStore';
@@ -8,9 +8,7 @@
 
   let filteredEvents: WebhookEvent[] = [];
   let filterId = '';
-  let intervalId: number | undefined;
   let pollingEnabled = true;
-  let pollingInterval = 3000;
 
   // Subscribe to store changes
   $: filteredEvents = filterId
@@ -28,64 +26,27 @@
       if (savedPollingEnabled !== null) {
         pollingEnabled = savedPollingEnabled === 'true';
       }
-      
-      const savedPollingInterval = localStorage.getItem('pollingInterval');
-      if (savedPollingInterval) {
-        pollingInterval = parseInt(savedPollingInterval, 10);
-      }
     }
     
     // Fetch initial data
     fetchWebhookEvents();
-    
-    // Set up polling if enabled
-    if (pollingEnabled) {
-      startPolling();
-    }
   });
 
-  function startPolling() {
-    // Clear any existing interval
-    if (intervalId) {
-      clearInterval(intervalId);
-    }
-    
-    // Set up new polling interval
-    intervalId = window.setInterval(fetchWebhookEvents, pollingInterval);
-    console.log('Polling started with interval:', pollingInterval);
-  }
-  
   function togglePolling() {
     pollingEnabled = !pollingEnabled;
     
     if (typeof window !== 'undefined') {
+      // Save to localStorage and dispatch a storage event for the layout component to detect
       localStorage.setItem('pollingEnabled', pollingEnabled.toString());
-    }
-    
-    if (pollingEnabled) {
-      startPolling();
-    } else if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = undefined;
-    }
-  }
-  
-  function updatePollingInterval(newInterval: number) {
-    pollingInterval = newInterval;
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('pollingInterval', pollingInterval.toString());
-    }
-    
-    if (pollingEnabled) {
-      startPolling();
+      
+      // Manually dispatch a storage event since setting localStorage in the same window doesn't trigger it
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'pollingEnabled',
+        newValue: pollingEnabled.toString(),
+        storageArea: localStorage
+      }));
     }
   }
-
-  onDestroy(() => {
-    if (intervalId) {
-      clearInterval(intervalId);
-    }
-  });
 </script>
 
 <div class="max-w-6xl mx-auto">

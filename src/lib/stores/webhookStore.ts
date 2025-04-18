@@ -19,6 +19,14 @@ export const lastEventTimestamp = writable<string>(
   isBrowser ? localStorage.getItem('lastEventTimestamp') || '' : ''
 );
 
+// Helper function to check if polling is enabled
+export function isPollingEnabled(): boolean {
+  if (!isBrowser) return false;
+  
+  const savedPollingEnabled = localStorage.getItem('pollingEnabled');
+  return savedPollingEnabled === null ? true : savedPollingEnabled === 'true';
+}
+
 // Load webhook events from localStorage
 function loadFromLocalStorage(): WebhookEvent[] {
   if (!isBrowser) return [];
