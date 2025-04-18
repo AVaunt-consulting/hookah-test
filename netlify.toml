@@ -7,4 +7,5 @@
   port = 5173
 
 [build.environment]
-  NODE_VERSION = "18" 
+  NODE_VERSION = "18"
+  PUBLIC_BASE_URL = "https://hookah-test.netlify.app" 
