@@ -79,8 +79,15 @@
             typeof message.content === 'object' && 
             'value' in message.content) {
           const messageValue = String(message.content.value);
-          console.log('Debug: Extracted message value:', messageValue);
+          console.log('Debug: Extracted message value from content:', messageValue);
           return messageValue;
+        }
+        
+        // Check for direct value property in message object
+        if (message && typeof message === 'object' && 'value' in message) {
+          const directValue = String(message.value);
+          console.log('Debug: Extracted direct value from message object:', directValue);
+          return directValue;
         }
         
         // Direct string value

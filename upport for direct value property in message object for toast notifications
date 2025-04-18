@@ -1,0 +1,72 @@
+[1mdiff --git a/src/lib/components/WebhookNotification.svelte b/src/lib/components/WebhookNotification.svelte[m
+[1mindex 4788599..f387dd1 100644[m
+[1m--- a/src/lib/components/WebhookNotification.svelte[m
+[1m+++ b/src/lib/components/WebhookNotification.svelte[m
+[36m@@ -56,9 +56,13 @@[m
+     try {[m
+       // Get the latest webhook event[m
+       const events = get(webhookEvents);[m
+[31m-      if (events.length === 0) return undefined;[m
+[32m+[m[32m      if (events.length === 0) {[m
+[32m+[m[32m        console.log('Debug: No events found in webhookEvents store');[m
+[32m+[m[32m        return undefined;[m
+[32m+[m[32m      }[m
+       [m
+       const latestEvent = events[0];[m
+[32m+[m[32m      console.log('Debug: Latest event:', latestEvent);[m
+       [m
+       // Check if it has a message property at the root level[m
+       if (latestEvent.body && [m
+[36m@@ -66,6 +70,7 @@[m
+           'message' in latestEvent.body) {[m
+         [m
+         const message = latestEvent.body.message;[m
+[32m+[m[32m        console.log('Debug: Found message property:', message);[m
+         [m
+         // Handle structure like { message: { content: { value: "Text" } } }[m
+         if (message && typeof message === 'object' && [m
+[36m@@ -73,13 +78,20 @@[m
+             message.content && [m
+             typeof message.content === 'object' && [m
+             'value' in message.content) {[m
+[31m-          return String(message.content.value);[m
+[32m+[m[32m          const messageValue = String(message.content.value);[m
+[32m+[m[32m          console.log('Debug: Extracted message value:', messageValue);[m
+[32m+[m[32m          return messageValue;[m
+         }[m
+         [m
+         // Direct string value[m
+         if (typeof message === 'string') {[m
+[32m+[m[32m          console.log('Debug: Message is a direct string:', message);[m
+           return message;[m
+         }[m
+[32m+[m
+[32m+[m[32m        console.log('Debug: Message found but structure not recognized:', message);[m
+[32m+[m[32m      } else {[m
+[32m+[m[32m        console.log('Debug: No message property found in event body:', latestEvent.body);[m
+       }[m
+       [m
+       return undefined;[m
+[36m@@ -89,9 +101,13 @@[m
+     }[m
+   }[m
+   [m
+[32m+[m[32m  // Direct debug for current event[m
+[32m+[m[32m  $: console.log('Debug: Current event being rendered:', event);[m
+[32m+[m[41m  [m
+   // Generate a message from event data or root message[m
+   $: rootMessage = getRootMessage();[m
+   $: message = event.message || rootMessage || generateMessage(event);[m
+[32m+[m[32m  $: console.log('Debug: Final message being displayed:', message, 'from sources - event.message:', event.message, 'rootMessage:', rootMessage);[m
+   [m
+   function generateMessage(evt: Event): string {[m
+     // Try to generate a meaningful message from the event data[m
+[36m@@ -144,7 +160,7 @@[m
+             </div>[m
+             <div class="text-sm text-gray-600 dark:text-gray-300 break-words">[m
+               <span class="font-medium">Message:</span> [m
+[31m-              <span class="inline-block max-w-full">{message}</span>[m
+[32m+[m[32m              <span class="inline-block max-w-full">{message || "No message found"}</span>[m
+             </div>[m
+             <div class="flex justify-end">[m
+               <span class="inline-flex rounded-md text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">[m

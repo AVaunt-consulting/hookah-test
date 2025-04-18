@@ -20,6 +20,21 @@
       message = webhookEvent.rootMessage;
     }
     
+    // Try to extract a message from direct message.value at root level if present
+    if (!message && 'rootMessageObject' in webhookEvent) {
+      const rootMsgObj = webhookEvent.rootMessageObject;
+      if (rootMsgObj && typeof rootMsgObj === 'object') {
+        if ('value' in rootMsgObj) {
+          message = String(rootMsgObj.value);
+        } else if ('content' in rootMsgObj && 
+                  rootMsgObj.content && 
+                  typeof rootMsgObj.content === 'object' && 
+                  'value' in rootMsgObj.content) {
+          message = String(rootMsgObj.content.value);
+        }
+      }
+    }
+    
     if (webhookEvent.data && typeof webhookEvent.data === 'object' && webhookEvent.data !== null) {
       kind = 'kind' in webhookEvent.data ? String(webhookEvent.data.kind) : undefined;
       typeName = 'type_name' in webhookEvent.data ? String(webhookEvent.data.type_name) : undefined;

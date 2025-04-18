@@ -41,14 +41,25 @@ export function addToast(webhookEvent: WebhookEvent) {
         type?: string,
         value?: string
       },
+      value?: string,
       mime_type?: string
     }
   };
   
   // Extract message from the root level if it exists
   let messageContent: string | undefined = undefined;
-  if (payload.message && payload.message.content && payload.message.content.value) {
-    messageContent = String(payload.message.content.value);
+  const messageObject = payload.message;
+  
+  // Check different possible structures for the message
+  if (messageObject) {
+    // Check direct value in message object
+    if ('value' in messageObject && messageObject.value) {
+      messageContent = String(messageObject.value);
+    }
+    // Check nested content.value structure
+    else if (messageObject.content && messageObject.content.value) {
+      messageContent = String(messageObject.content.value);
+    }
   }
   
   // Only process the first event in the webhook payload
@@ -58,13 +69,17 @@ export function addToast(webhookEvent: WebhookEvent) {
     let event = payload.events[0]; // Get only the first event - using let to allow modification
     const toastId = generateUniqueId();
     
-    // Add the root message to the event if it exists
-    if (messageContent) {
-      // Use type assertion to add the rootMessage property
+    // Add the root message and message object to the event if it exists
+    if (messageContent || messageObject) {
+      // Use type assertion to add the properties
       event = {
         ...event,
-        rootMessage: messageContent
-      } as WebhookEventData & { rootMessage: string };
+        rootMessage: messageContent,
+        rootMessageObject: messageObject
+      } as WebhookEventData & { 
+        rootMessage?: string; 
+        rootMessageObject?: typeof messageObject 
+      };
     }
     
     toasts.update(currentToasts => {
