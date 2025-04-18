@@ -4,8 +4,8 @@ export default async (request, context) => {
   
   // Special handling for the root path
   if (url.pathname === '/' || url.pathname === '') {
-    // Redirect to the SvelteKit handler
-    return context.rewrite('/.netlify/functions/sveltekit-render');
+    // Use rewrite instead of redirect to avoid redirect loops
+    return context.rewrite('/.netlify/functions/sveltekit-render/');
   }
   
   // Let other routes proceed normally

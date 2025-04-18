@@ -1,7 +1,7 @@
-# Make the root path directly handled by SvelteKit
-/ /.netlify/functions/sveltekit-render/ 200
+# Direct SvelteKit handler routes
+/.netlify/functions/sveltekit-render/*  /.netlify/functions/sveltekit-render/:splat  200
 
-# Individual routes
+# Individual routes - explicitly map them so they don't get caught in redirect loops
 /generate /.netlify/functions/sveltekit-render/generate 200
 /requests /.netlify/functions/sveltekit-render/requests 200
 /requests/* /.netlify/functions/sveltekit-render/requests/:splat 200
@@ -10,5 +10,8 @@
 # API routes
 /api/* /.netlify/functions/sveltekit-render/api/:splat 200
 
-# SPA fallback (all other routes)
-/* /.netlify/functions/sveltekit-render/:splat 200
+# Root - handle by edge function, this is just a fallback
+/ /.netlify/functions/sveltekit-render/ 200
+
+# SPA fallback - only for routes not otherwise matched
+/* /200.html 200
