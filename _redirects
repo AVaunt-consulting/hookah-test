@@ -1,5 +1,7 @@
-# SvelteKit function paths - ensure proper rendering for all routes
+# Root path - redirect explicitly to SvelteKit home page
 / /.netlify/functions/sveltekit-render 200!
+
+# SvelteKit function paths
 /generate /.netlify/functions/sveltekit-render/generate 200
 /requests /.netlify/functions/sveltekit-render/requests 200
 /requests/* /.netlify/functions/sveltekit-render/requests/:splat 200

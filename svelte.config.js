@@ -12,9 +12,8 @@ const config = {
 		paths: {
 			base: ''
 		},
-		// Define the production URL
-		alias: {
-			$lib: './src/lib'
+		prerender: {
+			entries: ['/']
 		}
 	}
 };
