@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm config set unsafe-perm true && pnpm config set node-linker hoisted && pnpm run build"
+  command = "pnpm install --no-frozen-lockfile && pnpm run build"
   publish = ".netlify/functions-internal"
 
 [dev]
@@ -7,4 +7,4 @@
   port = 5173
 
 [build.environment]
-  NPM_FLAGS = "--unsafe-perm=true" 
+  NODE_VERSION = "18" 
