@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { WebhookEvent } from '../../routes/api/webhook/+server';
+  import type { WebhookEvent, WebhookEventData } from '../../routes/api/webhook/+server';
+  import ResourceInfo from './ResourceInfo.svelte';
   
   export let event: WebhookEvent;
   
   let expanded = false;
   
-  function formatJson(json: any): string {
+  function formatJson(json: unknown): string {
     try {
       return JSON.stringify(json, null, 2);
     } catch (e) {
@@ -28,6 +29,60 @@
       toggleExpanded();
     }
   }
+
+  // Define interfaces for webhook event data
+  interface ResourceField {
+    value: string;
+    kind: string;
+    type_name?: string;
+    field_name?: string;
+  }
+
+  interface EventDataWithFields {
+    fields?: ResourceField[];
+    data?: {
+      fields?: ResourceField[];
+    };
+  }
+
+  // Extract resource addresses from webhook event, if available
+  function extractResourceAddresses(event: WebhookEvent): string[] {
+    const resourceAddresses: string[] = [];
+    
+    if (event.body && typeof event.body === 'object' && 'events' in event.body) {
+      const events = (event.body as { events: EventDataWithFields[] }).events;
+      
+      if (Array.isArray(events)) {
+        events.forEach(eventData => {
+          // Check direct fields
+          if (eventData.fields) {
+            extractResourceFromFields(eventData.fields, resourceAddresses);
+          }
+          
+          // Check nested data fields
+          if (eventData.data?.fields) {
+            extractResourceFromFields(eventData.data.fields, resourceAddresses);
+          }
+        });
+      }
+    }
+    
+    return [...new Set(resourceAddresses)]; // Remove duplicates
+  }
+  
+  function extractResourceFromFields(fields: ResourceField[], resourceAddresses: string[]): void {
+    fields.forEach(field => {
+      // Look for Reference type fields with ResourceAddress type_name
+      if (field.kind === 'Reference' && 
+          field.type_name === 'ResourceAddress' && 
+          field.value && 
+          field.value.startsWith('resource_')) {
+        resourceAddresses.push(field.value);
+      }
+    });
+  }
+  
+  const resourceAddresses = extractResourceAddresses(event);
 </script>
 
 <div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
@@ -65,6 +120,19 @@
   
   {#if expanded}
     <div class="p-4">
+      {#if resourceAddresses.length > 0}
+        <div class="mb-4">
+          <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Resource Information</h3>
+          <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded overflow-x-auto">
+            <div class="space-y-2">
+              {#each resourceAddresses as resourceAddress}
+                <ResourceInfo {resourceAddress} />
+              {/each}
+            </div>
+          </div>
+        </div>
+      {/if}
+    
       <div class="mb-4">
         <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Headers</h3>
         <pre class="bg-gray-50 dark:bg-gray-900 p-3 rounded overflow-x-auto text-sm text-gray-800 dark:text-gray-300">{formatJson(event.headers)}</pre>
