@@ -6,8 +6,5 @@
 # API routes
 /api/* /.netlify/functions/sveltekit-render/api/:splat 200
 
-# Make sure SvelteKit-internal paths work
-/.netlify/* /.netlify/:splat 200
-
 # SPA fallback - must be last
 /* /index.html 200
