@@ -21,14 +21,16 @@
     filterId = urlParams.get('id') || '';
     
     // Check if polling settings are saved in localStorage
-    const savedPollingEnabled = localStorage.getItem('pollingEnabled');
-    if (savedPollingEnabled !== null) {
-      pollingEnabled = savedPollingEnabled === 'true';
-    }
-    
-    const savedPollingInterval = localStorage.getItem('pollingInterval');
-    if (savedPollingInterval) {
-      pollingInterval = parseInt(savedPollingInterval, 10);
+    if (typeof window !== 'undefined') {
+      const savedPollingEnabled = localStorage.getItem('pollingEnabled');
+      if (savedPollingEnabled !== null) {
+        pollingEnabled = savedPollingEnabled === 'true';
+      }
+      
+      const savedPollingInterval = localStorage.getItem('pollingInterval');
+      if (savedPollingInterval) {
+        pollingInterval = parseInt(savedPollingInterval, 10);
+      }
     }
     
     // Fetch initial data
@@ -52,7 +54,9 @@
   
   function togglePolling() {
     pollingEnabled = !pollingEnabled;
-    localStorage.setItem('pollingEnabled', pollingEnabled.toString());
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pollingEnabled', pollingEnabled.toString());
+    }
     
     if (pollingEnabled) {
       startPolling();
@@ -64,7 +68,9 @@
   
   function updatePollingInterval(newInterval: number) {
     pollingInterval = newInterval;
-    localStorage.setItem('pollingInterval', pollingInterval.toString());
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('pollingInterval', pollingInterval.toString());
+    }
     
     if (pollingEnabled) {
       startPolling();

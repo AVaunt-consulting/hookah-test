@@ -6,16 +6,23 @@ import { addToast } from './toastStore';
 const STORAGE_KEY = 'webhookEvents';
 const MAX_STORED_EVENTS = 100;
 
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
 // Initialize the store with data from localStorage if available
 const initialEvents = loadFromLocalStorage();
 
 export const webhookEvents = writable<WebhookEvent[]>(initialEvents);
 export const isLoading = writable<boolean>(false);
 export const error = writable<string>('');
-export const lastEventTimestamp = writable<string>(localStorage.getItem('lastEventTimestamp') || '');
+export const lastEventTimestamp = writable<string>(
+  isBrowser ? localStorage.getItem('lastEventTimestamp') || '' : ''
+);
 
 // Load webhook events from localStorage
 function loadFromLocalStorage(): WebhookEvent[] {
+  if (!isBrowser) return [];
+  
   try {
     const storedData = localStorage.getItem(STORAGE_KEY);
     if (storedData) {
@@ -29,6 +36,8 @@ function loadFromLocalStorage(): WebhookEvent[] {
 
 // Save webhook events to localStorage
 function saveToLocalStorage(events: WebhookEvent[]) {
+  if (!isBrowser) return;
+  
   try {
     // Limit the number of events stored to prevent excessive storage use
     const eventsToStore = events.slice(0, MAX_STORED_EVENTS);
@@ -54,12 +63,14 @@ export async function fetchWebhookEvents() {
     const data = await response.json() as WebhookEvent[];
     
     // Check for new events by comparing timestamps
-    const lastTimestamp = localStorage.getItem('lastEventTimestamp');
+    const lastTimestamp = isBrowser ? localStorage.getItem('lastEventTimestamp') : null;
     
     if (data.length > 0) {
       // Store the timestamp of the most recent event
       const mostRecentTimestamp = data[0].timestamp;
-      localStorage.setItem('lastEventTimestamp', mostRecentTimestamp);
+      if (isBrowser) {
+        localStorage.setItem('lastEventTimestamp', mostRecentTimestamp);
+      }
       lastEventTimestamp.set(mostRecentTimestamp);
       
       // If there are new events (newer than the last timestamp we've seen)
@@ -99,7 +110,9 @@ export async function clearWebhookEvents() {
     
     // Clear both the store and localStorage
     webhookEvents.set([]);
-    localStorage.removeItem(STORAGE_KEY);
+    if (isBrowser) {
+      localStorage.removeItem(STORAGE_KEY);
+    }
     error.set('');
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';

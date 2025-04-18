@@ -1,0 +1,177 @@
+[1mdiff --git a/src/lib/stores/webhookStore.ts b/src/lib/stores/webhookStore.ts[m
+[1mindex f80b121..1c08261 100644[m
+[1m--- a/src/lib/stores/webhookStore.ts[m
+[1m+++ b/src/lib/stores/webhookStore.ts[m
+[36m@@ -6,16 +6,23 @@[m [mimport { addToast } from './toastStore';[m
+ const STORAGE_KEY = 'webhookEvents';[m
+ const MAX_STORED_EVENTS = 100;[m
+ [m
+[32m+[m[32m// Check if we're in a browser environment[m
+[32m+[m[32mconst isBrowser = typeof window !== 'undefined';[m
+[32m+[m
+ // Initialize the store with data from localStorage if available[m
+ const initialEvents = loadFromLocalStorage();[m
+ [m
+ export const webhookEvents = writable<WebhookEvent[]>(initialEvents);[m
+ export const isLoading = writable<boolean>(false);[m
+ export const error = writable<string>('');[m
+[31m-export const lastEventTimestamp = writable<string>(localStorage.getItem('lastEventTimestamp') || '');[m
+[32m+[m[32mexport const lastEventTimestamp = writable<string>([m
+[32m+[m[32m  isBrowser ? localStorage.getItem('lastEventTimestamp') || '' : ''[m
+[32m+[m[32m);[m
+ [m
+ // Load webhook events from localStorage[m
+ function loadFromLocalStorage(): WebhookEvent[] {[m
+[32m+[m[32m  if (!isBrowser) return [];[m
+[32m+[m[41m  [m
+   try {[m
+     const storedData = localStorage.getItem(STORAGE_KEY);[m
+     if (storedData) {[m
+[36m@@ -29,6 +36,8 @@[m [mfunction loadFromLocalStorage(): WebhookEvent[] {[m
+ [m
+ // Save webhook events to localStorage[m
+ function saveToLocalStorage(events: WebhookEvent[]) {[m
+[32m+[m[32m  if (!isBrowser) return;[m
+[32m+[m[41m  [m
+   try {[m
+     // Limit the number of events stored to prevent excessive storage use[m
+     const eventsToStore = events.slice(0, MAX_STORED_EVENTS);[m
+[36m@@ -54,12 +63,14 @@[m [mexport async function fetchWebhookEvents() {[m
+     const data = await response.json() as WebhookEvent[];[m
+     [m
+     // Check for new events by comparing timestamps[m
+[31m-    const lastTimestamp = localStorage.getItem('lastEventTimestamp');[m
+[32m+[m[32m    const lastTimestamp = isBrowser ? localStorage.getItem('lastEventTimestamp') : null;[m
+     [m
+     if (data.length > 0) {[m
+       // Store the timestamp of the most recent event[m
+       const mostRecentTimestamp = data[0].timestamp;[m
+[31m-      localStorage.setItem('lastEventTimestamp', mostRecentTimestamp);[m
+[32m+[m[32m      if (isBrowser) {[m
+[32m+[m[32m        localStorage.setItem('lastEventTimestamp', mostRecentTimestamp);[m
+[32m+[m[32m      }[m
+       lastEventTimestamp.set(mostRecentTimestamp);[m
+       [m
+       // If there are new events (newer than the last timestamp we've seen)[m
+[36m@@ -99,7 +110,9 @@[m [mexport async function clearWebhookEvents() {[m
+     [m
+     // Clear both the store and localStorage[m
+     webhookEvents.set([]);[m
+[31m-    localStorage.removeItem(STORAGE_KEY);[m
+[32m+[m[32m    if (isBrowser) {[m
+[32m+[m[32m      localStorage.removeItem(STORAGE_KEY);[m
+[32m+[m[32m    }[m
+     error.set('');[m
+   } catch (err) {[m
+     const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';[m
+[1mdiff --git a/src/routes/generate/+page.svelte b/src/routes/generate/+page.svelte[m
+[1mindex 98ebbe4..0822abf 100644[m
+[1m--- a/src/routes/generate/+page.svelte[m
+[1m+++ b/src/routes/generate/+page.svelte[m
+[36m@@ -6,16 +6,19 @@[m
+   let uniqueId = '';[m
+   let curlCommand = '';[m
+   let isUrlGenerated = false;[m
+[32m+[m[32m  let protocol = 'http';[m
+ [m
+   onMount(() => {[m
+[31m-    // Check if we have a saved webhook URL in localStorage[m
+[31m-    const savedUniqueId = localStorage.getItem('webhookUniqueId');[m
+[31m-    if (savedUniqueId) {[m
+[31m-      uniqueId = savedUniqueId;[m
+[31m-      const baseUrl = window.location.origin;[m
+[31m-      webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;[m
+[31m-      updateCurlCommand();[m
+[31m-      isUrlGenerated = true;[m
+[32m+[m[32m    // Check for saved uniqueId in localStorage[m
+[32m+[m[32m    if (typeof window !== 'undefined') {[m
+[32m+[m[32m      const savedUniqueId = localStorage.getItem('webhookUniqueId');[m
+[32m+[m[32m      if (savedUniqueId) {[m
+[32m+[m[32m        uniqueId = savedUniqueId;[m
+[32m+[m[32m        const baseUrl = window.location.origin;[m
+[32m+[m[32m        webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;[m
+[32m+[m[32m        updateCurlCommand();[m
+[32m+[m[32m        isUrlGenerated = true;[m
+[32m+[m[32m      }[m
+     }[m
+   });[m
+ [m
+[36m@@ -25,7 +28,9 @@[m
+     webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;[m
+     [m
+     // Save to localStorage[m
+[31m-    localStorage.setItem('webhookUniqueId', uniqueId);[m
+[32m+[m[32m    if (typeof window !== 'undefined') {[m
+[32m+[m[32m      localStorage.setItem('webhookUniqueId', uniqueId);[m
+[32m+[m[32m    }[m
+     [m
+     updateCurlCommand();[m
+     isUrlGenerated = true;[m
+[36m@@ -63,6 +68,16 @@[m
+       }, 2000);[m
+     });[m
+   }[m
+[32m+[m
+[32m+[m[32m  function handleSubmit() {[m
+[32m+[m[32m    if (uniqueId) {[m
+[32m+[m[32m      // Store uniqueId in localStorage for future use[m
+[32m+[m[32m      if (typeof window !== 'undefined') {[m
+[32m+[m[32m        localStorage.setItem('webhookUniqueId', uniqueId);[m
+[32m+[m[32m      }[m
+[32m+[m[32m      window.location.href = `/requests?id=${uniqueId}`;[m
+[32m+[m[32m    }[m
+[32m+[m[32m  }[m
+ </script>[m
+ [m
+ <div class="max-w-3xl mx-auto">[m
+[1mdiff --git a/src/routes/requests/+page.svelte b/src/routes/requests/+page.svelte[m
+[1mindex 2315005..fe46724 100644[m
+[1m--- a/src/routes/requests/+page.svelte[m
+[1m+++ b/src/routes/requests/+page.svelte[m
+[36m@@ -21,14 +21,16 @@[m
+     filterId = urlParams.get('id') || '';[m
+     [m
+     // Check if polling settings are saved in localStorage[m
+[31m-    const savedPollingEnabled = localStorage.getItem('pollingEnabled');[m
+[31m-    if (savedPollingEnabled !== null) {[m
+[31m-      pollingEnabled = savedPollingEnabled === 'true';[m
+[31m-    }[m
+[31m-    [m
+[31m-    const savedPollingInterval = localStorage.getItem('pollingInterval');[m
+[31m-    if (savedPollingInterval) {[m
+[31m-      pollingInterval = parseInt(savedPollingInterval, 10);[m
+[32m+[m[32m    if (typeof window !== 'undefined') {[m
+[32m+[m[32m      const savedPollingEnabled = localStorage.getItem('pollingEnabled');[m
+[32m+[m[32m      if (savedPollingEnabled !== null) {[m
+[32m+[m[32m        pollingEnabled = savedPollingEnabled === 'true';[m
+[32m+[m[32m      }[m
+[32m+[m[41m      [m
+[32m+[m[32m      const savedPollingInterval = localStorage.getItem('pollingInterval');[m
+[32m+[m[32m      if (savedPollingInterval) {[m
+[32m+[m[32m        pollingInterval = parseInt(savedPollingInterval, 10);[m
+[32m+[m[32m      }[m
+     }[m
+     [m
+     // Fetch initial data[m
+[36m@@ -52,7 +54,9 @@[m
+   [m
+   function togglePolling() {[m
+     pollingEnabled = !pollingEnabled;[m
+[31m-    localStorage.setItem('pollingEnabled', pollingEnabled.toString());[m
+[32m+[m[32m    if (typeof window !== 'undefined') {[m
+[32m+[m[32m      localStorage.setItem('pollingEnabled', pollingEnabled.toString());[m
+[32m+[m[32m    }[m
+     [m
+     if (pollingEnabled) {[m
+       startPolling();[m
+[36m@@ -64,7 +68,9 @@[m
+   [m
+   function updatePollingInterval(newInterval: number) {[m
+     pollingInterval = newInterval;[m
+[31m-    localStorage.setItem('pollingInterval', pollingInterval.toString());[m
+[32m+[m[32m    if (typeof window !== 'undefined') {[m
+[32m+[m[32m      localStorage.setItem('pollingInterval', pollingInterval.toString());[m
+[32m+[m[32m    }[m
+     [m
+     if (pollingEnabled) {[m
+       startPolling();[m
