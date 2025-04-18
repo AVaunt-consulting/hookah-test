@@ -47,7 +47,7 @@
   }
 </script>
 
-<div class={standalone ? "fixed top-4 right-4 z-50 max-w-sm w-full" : "max-w-sm w-full"}>
+<div class={standalone ? "fixed top-4 right-4 z-50 w-full max-w-md" : "w-full max-w-md"}>
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden border-l-4 border-green-500">
     <div class="p-4">
       <div class="flex items-start">
@@ -57,7 +57,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <div class="ml-3 w-0 flex-1">
+        <div class="ml-3 flex-1">
           <p class="text-sm font-medium text-gray-900 dark:text-white">
             {event.eventName} <span class="text-gray-500 dark:text-gray-400 text-xs">({accountId})</span>
           </p>

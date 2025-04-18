@@ -27,10 +27,10 @@
   }
 </script>
 
-<div class="fixed top-4 right-4 z-50 flex flex-col gap-4">
+<div class="fixed top-4 right-4 z-50 flex flex-col gap-3 w-auto">
   {#each $toasts as toast (toast.id)}
     {#if toast.visible}
-      <div class="transform transition-all duration-300 ease-in-out" 
+      <div class="transform transition-all duration-300 ease-in-out max-w-md w-full" 
           class:opacity-0={!toast.visible} 
           class:translate-x-full={!toast.visible}>
         <WebhookNotification 
