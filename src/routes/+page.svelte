@@ -1,5 +1,5 @@
 <div class="max-w-3xl mx-auto">
-  <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Webhook Test and Debug Tool</h1>
+  <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Hookah Webhook Test and Debug Tool</h1>
   
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
     <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">What is this tool?</h2>

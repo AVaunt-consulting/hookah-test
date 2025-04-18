@@ -25,7 +25,7 @@
 		<div class="container mx-auto px-4 py-4">
 			<div class="flex justify-between items-center">
 				<h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-					<a href="/">Webhook Tester</a>
+					<a href="/">Hookah Webhook Tester</a>
 				</h1>
 				<nav class="flex space-x-4">
 					<a href="/" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Home</a>
