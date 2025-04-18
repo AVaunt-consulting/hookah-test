@@ -31,6 +31,16 @@
     emitter: Emitter;
     data: EventData;
     message?: string; // Optional message field
+    rootMessage?: string; // Optional root message field
+    rootMessageObject?: {
+      type?: string;
+      content?: {
+        type?: string;
+        value?: string;
+      };
+      value?: string;
+      mime_type?: string;
+    }; // Optional rootMessageObject field
   }
 
   export let event: Event;
@@ -115,6 +125,11 @@
   $: rootMessage = getRootMessage();
   $: console.log('Debug: Root message from event:', rootMessage);
   $: console.log('Debug: Direct message from event object:', event.message);
+  $: hasRootMessageObject = 'rootMessageObject' in event && event.rootMessageObject !== undefined;
+  $: rootMessageObjectValue = hasRootMessageObject && 
+     typeof event.rootMessageObject === 'object' &&
+     'value' in event.rootMessageObject ? 
+     String(event.rootMessageObject.value) : undefined;
   $: message = event.message || rootMessage || generateMessage(event);
   $: messageSource = event.message ? 'event' : (rootMessage ? 'root' : 'generated');
   $: console.log('Debug: Final message being displayed:', message);
@@ -168,6 +183,18 @@
             <div class="text-sm text-gray-600 dark:text-gray-300">
               <span class="font-medium">Amount:</span> {amount}
             </div>
+            {#if rootMessage}
+            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto">
+              <span class="font-medium">Root Message:</span> 
+              <span class="inline-block max-w-full">{rootMessage}</span>
+            </div>
+            {/if}
+            {#if rootMessageObjectValue && rootMessageObjectValue !== rootMessage}
+            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto">
+              <span class="font-medium">Direct Value:</span> 
+              <span class="inline-block max-w-full">{rootMessageObjectValue}</span>
+            </div>
+            {/if}
             <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-24 overflow-y-auto">
               <span class="font-medium">Message:</span> 
               <span class="inline-block max-w-full">{message || "No message found"}</span>
