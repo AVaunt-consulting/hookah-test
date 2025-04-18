@@ -1,8 +1,13 @@
-# Make sure SvelteKit-internal requests go to the function
-/.netlify/* /.netlify/:splat 200
+# SvelteKit function path for internal app routes
+/generate /.netlify/functions/sveltekit-render/generate 200
+/requests /.netlify/functions/sveltekit-render/requests 200
+/requests/* /.netlify/functions/sveltekit-render/requests/:splat 200
 
 # API routes
-/api/* /.netlify/functions/sveltekit-render 200
+/api/* /.netlify/functions/sveltekit-render/api/:splat 200
+
+# Make sure SvelteKit-internal paths work
+/.netlify/* /.netlify/:splat 200
 
 # SPA fallback - must be last
 /* /index.html 200

@@ -8,8 +8,12 @@ const REDIRECTS_FILE = './_redirects';
 
 // Create target directory if it doesn't exist
 if (!fs.existsSync(TARGET_DIR)) {
+  console.log(`Creating directory: ${TARGET_DIR}`);
   fs.mkdirSync(TARGET_DIR, { recursive: true });
 }
+
+// Create a visible indicator that the build is using our files
+fs.writeFileSync(path.join(TARGET_DIR, 'build-info.txt'), `Build created at: ${new Date().toISOString()}\nIncludes custom redirects and static files`);
 
 // Copy _redirects file
 console.log(`Copying ${REDIRECTS_FILE} to ${TARGET_DIR}`);
@@ -41,4 +45,12 @@ function copyDir(src, dest) {
 console.log(`Copying contents from ${SOURCE_DIR} to ${TARGET_DIR}`);
 copyDir(SOURCE_DIR, TARGET_DIR);
 
-console.log('All files copied successfully!'); 
+console.log('All files copied successfully!');
+
+// Verify the redirects file exists in the target directory
+if (fs.existsSync(path.join(TARGET_DIR, '_redirects'))) {
+  console.log('Verified _redirects file is in the build directory');
+} else {
+  console.error('ERROR: _redirects file is missing from the build directory!');
+  process.exit(1);
+} 
