@@ -28,6 +28,7 @@
     eventName: string;
     emitter: Emitter;
     data: EventData;
+    message?: string; // Optional message field
   }
 
   export let event: Event;
@@ -47,6 +48,32 @@
   $: amountField = event.data.fields?.find(field => field.field_name === 'amount') || 
                    event.data.fields?.find(field => field.kind === 'Decimal');
   $: amount = amountField?.value || '0';
+  
+  // Generate a message from event data
+  $: message = event.message || generateMessage(event);
+  
+  function generateMessage(evt: Event): string {
+    // Try to generate a meaningful message from the event data
+    const resourceField = evt.data.fields?.find(field => field.type_name === 'ResourceAddress');
+    const resourceAddress = resourceField?.value || '';
+    
+    // Create a truncated version of the resource address if it exists
+    const truncatedResource = resourceAddress ? 
+      truncateEmitter(resourceAddress) : '';
+    
+    // Build a message based on the event type and available data
+    if (evt.eventName === 'DepositEvent') {
+      return `Deposited ${amount} ${truncatedResource ? 'of ' + truncatedResource : ''}`;
+    } else if (evt.eventName === 'WithdrawEvent') {
+      return `Withdrew ${amount} ${truncatedResource ? 'of ' + truncatedResource : ''}`;
+    } else if (evt.eventName === 'TransferEvent') {
+      return `Transferred ${amount} ${truncatedResource ? 'of ' + truncatedResource : ''}`;
+    } else {
+      // Default message for other event types
+      const typeName = evt.data.type_name || evt.data.kind || '';
+      return `${evt.eventName}${typeName ? ' of type ' + typeName : ''}${amount !== '0' ? ' with amount ' + amount : ''}`;
+    }
+  }
   
   // Handle dismissal
   function handleDismiss() {
@@ -70,13 +97,18 @@
               <span title={fullEmitter}>({truncatedEmitter})</span>
             </span>
           </p>
-          <div class="mt-2 flex justify-between items-center">
+          <div class="mt-2 flex flex-col gap-2">
             <div class="text-sm text-gray-600 dark:text-gray-300">
               <span class="font-medium">Amount:</span> {amount}
             </div>
-            <span class="inline-flex rounded-md text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-              {event.data.kind || "Transaction"}
-            </span>
+            <div class="text-sm text-gray-600 dark:text-gray-300">
+              <span class="font-medium">Message:</span> {message}
+            </div>
+            <div class="flex justify-end">
+              <span class="inline-flex rounded-md text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                {event.data.kind || "Transaction"}
+              </span>
+            </div>
           </div>
         </div>
         <div class="ml-4 flex-shrink-0 flex">

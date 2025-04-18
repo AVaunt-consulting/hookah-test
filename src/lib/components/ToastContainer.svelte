@@ -13,10 +13,22 @@
     
     let kind = undefined;
     let typeName = undefined;
+    let message = undefined;
     
     if (webhookEvent.data && typeof webhookEvent.data === 'object' && webhookEvent.data !== null) {
       kind = 'kind' in webhookEvent.data ? String(webhookEvent.data.kind) : undefined;
       typeName = 'type_name' in webhookEvent.data ? String(webhookEvent.data.type_name) : undefined;
+      
+      // Try to extract a message from the data if it exists
+      if ('message' in webhookEvent.data) {
+        message = String(webhookEvent.data.message);
+      } else if ('fields' in webhookEvent.data) {
+        // Check if any field has field_name 'message'
+        const messageField = fields.find(field => field.field_name === 'message');
+        if (messageField) {
+          message = messageField.value;
+        }
+      }
     }
     
     return {
@@ -26,7 +38,8 @@
         fields,
         kind,
         type_name: typeName
-      }
+      },
+      message
     };
   }
 </script>
