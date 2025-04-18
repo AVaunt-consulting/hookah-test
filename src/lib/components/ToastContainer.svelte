@@ -51,7 +51,7 @@
   }
 </script>
 
-<div class="fixed top-4 right-4 z-50 flex flex-col gap-3 w-auto">
+<div class="fixed top-4 right-4 z-50 flex flex-col gap-4 w-auto max-h-screen overflow-y-auto pb-4">
   {#each $toasts as toast (toast.id)}
     {#if toast.visible}
       {#if toast.event}

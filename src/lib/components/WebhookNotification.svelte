@@ -158,7 +158,7 @@
             <div class="text-sm text-gray-600 dark:text-gray-300">
               <span class="font-medium">Amount:</span> {amount}
             </div>
-            <div class="text-sm text-gray-600 dark:text-gray-300 break-words">
+            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-24 overflow-y-auto">
               <span class="font-medium">Message:</span> 
               <span class="inline-block max-w-full">{message || "No message found"}</span>
             </div>
