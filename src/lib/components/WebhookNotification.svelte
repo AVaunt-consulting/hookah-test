@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
+  import { fetchResourceDetails, extractResourceMetadata } from '$lib/api/radixApi';
   
   const dispatch = createEventDispatcher();
 
@@ -38,6 +39,12 @@
   console.log('WEBHOOK NOTIFICATION: Rendered with event:', event.eventName);
   console.log('WEBHOOK NOTIFICATION: messageValue:', event.messageValue);
   
+  // Resource information
+  let resourceAddress = '';
+  let resourceName = '';
+  let resourceIconUrl: string | null = null;
+  let isLoadingResource = false;
+  
   // Function to truncate globalEmitter to first 11 chars + ellipsis + last 5 chars
   function truncateEmitter(emitter: string): string {
     if (!emitter || emitter.length <= 16) return emitter;
@@ -53,6 +60,41 @@
                    event.data.fields?.find(field => field.kind === 'Decimal');
   $: amount = amountField?.value || '0';
   
+  // Find resource address in the data fields
+  $: {
+    const resourceField = event.data.fields?.find(field => 
+      field.type_name === 'ResourceAddress' && 
+      field.kind === 'Reference' && 
+      field.value && 
+      field.value.startsWith('resource_')
+    );
+    
+    if (resourceField?.value) {
+      resourceAddress = resourceField.value;
+      loadResourceInfo(resourceAddress);
+    }
+  }
+  
+  // Load resource information from the Radix API
+  async function loadResourceInfo(address: string) {
+    if (!address) return;
+    
+    try {
+      isLoadingResource = true;
+      const resourceDetails = await fetchResourceDetails(address);
+      
+      if (resourceDetails) {
+        const metadata = extractResourceMetadata(resourceDetails);
+        resourceName = metadata.name;
+        resourceIconUrl = metadata.iconUrl;
+      }
+    } catch (error) {
+      console.error('Error loading resource info:', error);
+    } finally {
+      isLoadingResource = false;
+    }
+  }
+  
   // Generate a basic message if no custom message is available
   function generateMessage(evt: Event): string {
     // Try to generate a meaningful message from the event data
@@ -63,13 +105,16 @@
     const truncatedResource = resourceAddress ? 
       truncateEmitter(resourceAddress) : '';
     
+    // Use resource name if available
+    const displayResource = resourceName || truncatedResource;
+    
     // Build a message based on the event type and available data
     if (evt.eventName === 'DepositEvent') {
-      return `Deposited ${amount} ${truncatedResource ? 'of ' + truncatedResource : ''}`;
+      return `Deposited ${amount} ${displayResource}`;
     } else if (evt.eventName === 'WithdrawEvent') {
-      return `Withdrew ${amount} ${truncatedResource ? 'of ' + truncatedResource : ''}`;
+      return `Withdrew ${amount} ${displayResource}`;
     } else if (evt.eventName === 'TransferEvent') {
-      return `Transferred ${amount} ${truncatedResource ? 'of ' + truncatedResource : ''}`;
+      return `Transferred ${amount} ${displayResource}`;
     } else {
       // Default message for other event types
       const typeName = evt.data.type_name || evt.data.kind || '';
@@ -105,10 +150,32 @@
             </span>
           </p>
           <div class="mt-2 flex flex-col gap-2">
+            <!-- Amount -->
             <div class="text-sm text-gray-600 dark:text-gray-300">
               <span class="font-medium">Amount:</span> {amount}
             </div>
             
+            <!-- Resource information -->
+            {#if resourceAddress}
+              <div class="text-sm text-gray-600 dark:text-gray-300 flex items-center">
+                <span class="font-medium mr-1">Resource:</span>
+                {#if isLoadingResource}
+                  <div class="w-4 h-4 mr-1 rounded-full bg-gray-200 animate-pulse"></div>
+                  <span>Loading...</span>
+                {:else}
+                  {#if resourceIconUrl}
+                    <img src={resourceIconUrl} alt={resourceName} class="w-4 h-4 mr-1 rounded-full" />
+                  {:else}
+                    <div class="w-4 h-4 mr-1 flex items-center justify-center bg-blue-100 text-blue-800 rounded-full text-xs font-bold">
+                      {resourceName ? resourceName.charAt(0) : 'R'}
+                    </div>
+                  {/if}
+                  <span>{resourceName || truncateEmitter(resourceAddress)}</span>
+                {/if}
+              </div>
+            {/if}
+            
+            <!-- Message -->
             <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-24 overflow-y-auto">
               <span class="font-medium">Message:</span> 
               <span class="inline-block max-w-full">{displayMessage}</span>
