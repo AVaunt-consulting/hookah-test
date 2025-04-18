@@ -29,27 +29,42 @@ pnpm run preview
 
 ## Deploying to Netlify
 
-This project is configured for easy deployment to Netlify.
+This project is configured for easy deployment to Netlify. The application uses the Netlify adapter for SvelteKit, which ensures your webhook endpoints will work correctly in a serverless environment.
 
 ### Automatic Deployment (recommended)
 
 1. Fork or clone this repository to your GitHub account
 2. Log in to Netlify and click "New site from Git"
 3. Select your GitHub repository
-4. Leave the default settings (build command: `pnpm run build`, publish directory: `.netlify/server`)
-5. Click "Deploy site"
+4. Configure the following build settings:
+   - Build command: `pnpm run build`
+   - Publish directory: `.netlify/server`
+5. Add the following environment variables (if needed):
+   - `NODE_VERSION`: `18.0.0` (or your preferred Node.js version)
+6. Click "Deploy site"
 
 ### Manual Deployment
 
 1. Install the Netlify CLI: `npm install -g netlify-cli`
 2. Build your site: `pnpm run build`
-3. Deploy to Netlify: `netlify deploy --prod`
+3. Login to Netlify: `netlify login`
+4. Initialize your site: `netlify init`
+5. Deploy to Netlify: `netlify deploy --prod`
+
+### Important Notes for Deployment
+
+- Webhook data is stored in memory and will be cleared when the serverless function is recycled
+- For a production application, you would want to implement a database for persistent storage
+- The Netlify free tier has function execution limits that might affect high-volume usage
 
 ## How It Works
 
 This webhook tester provides you with unique URLs that you can use as endpoints for your webhook integrations. When a webhook request is sent to one of these URLs, the application captures and displays the request details in a user-friendly interface.
 
-The application stores webhook events in memory, which means they will be cleared when the application restarts. For production use, you might want to implement persistent storage.
+In the serverless environment:
+1. Your webhook request is received by a Netlify serverless function
+2. The request details are captured and stored
+3. The web app retrieves and displays these details in real-time using polling
 
 ## License
 

@@ -1,0 +1,5 @@
+{
+  "name": "webhook-handler",
+  "path": "api/webhook",
+  "method": "ALL"
+} 
