@@ -4,7 +4,7 @@
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
     <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">What does this tool do?</h2>
     <p class="mb-4 text-gray-700 dark:text-gray-300">
-      This is a simple webhook testing tool that allows you to generate unique webhook URLs and inspect and test incoming webhook requests from app.hookah.ing in real-time.
+      This is a simple webhook testing tool that allows you to generate unique webhook URLs and inspect and test incoming webhook requests from <a href="https://app.hookah.ing/" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 hover:underline">app.hookah.ing</a> in real-time.
     </p>
     <p class="text-gray-700 dark:text-gray-300">
       Use this tool to debug and test your webhook integrations without needing to set up your own server.
