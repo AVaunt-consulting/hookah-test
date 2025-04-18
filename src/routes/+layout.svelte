@@ -1,5 +1,24 @@
 <script lang="ts">
 	import '../app.css';
+	import ToastContainer from '$lib/components/ToastContainer.svelte';
+	import { onMount } from 'svelte';
+	import { fetchWebhookEvents } from '$lib/stores/webhookStore';
+	
+	// Set up a polling interval to check for new webhook events
+	onMount(() => {
+		// Initial fetch
+		fetchWebhookEvents();
+		
+		// Set up polling every 5 seconds
+		const interval = setInterval(() => {
+			fetchWebhookEvents();
+		}, 5000);
+		
+		// Clear interval on component unmount
+		return () => {
+			clearInterval(interval);
+		};
+	});
 </script>
 
 <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
@@ -21,4 +40,7 @@
 	<main class="container mx-auto px-4 py-8">
 		<slot />
 	</main>
+	
+	<!-- Toast notifications will appear on every page -->
+	<ToastContainer />
 </div>
