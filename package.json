@@ -4,6 +4,7 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
+		"preinstall": "npx pnpm use --global && npm pkg get dependencies && npm pkg get devDependencies",
 		"dev": "vite dev",
 		"build": "vite build",
 		"postbuild": "node scripts/copy-files.js",
@@ -16,7 +17,8 @@
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
 		"test:unit": "vitest",
-		"test": "npm run test:unit -- --run"
+		"test": "npm run test:unit -- --run",
+		"netlify": "netlify"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^3",
