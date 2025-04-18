@@ -1,7 +1,7 @@
-# Root path - redirect explicitly to SvelteKit home page
-/ /.netlify/functions/sveltekit-render 200!
+# Make the root path directly handled by SvelteKit
+/ /.netlify/functions/sveltekit-render/ 200
 
-# SvelteKit function paths
+# Individual routes
 /generate /.netlify/functions/sveltekit-render/generate 200
 /requests /.netlify/functions/sveltekit-render/requests 200
 /requests/* /.netlify/functions/sveltekit-render/requests/:splat 200
@@ -10,5 +10,5 @@
 # API routes
 /api/* /.netlify/functions/sveltekit-render/api/:splat 200
 
-# SPA fallback - must be last
+# SPA fallback (all other routes)
 /* /.netlify/functions/sveltekit-render/:splat 200

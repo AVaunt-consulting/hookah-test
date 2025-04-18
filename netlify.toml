@@ -1,6 +1,7 @@
 [build]
   command = "rm -rf node_modules && pnpm install --no-frozen-lockfile && pnpm run build"
   publish = ".netlify/functions-internal"
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF ./src/ ./static/ ./svelte.config.js"
 
 [dev]
   command = "pnpm run dev"
