@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { PUBLIC_BASE_URL } from '$env/static/public';
 
   let webhookUrl = '';
   let copied = false;
@@ -12,7 +13,7 @@
 
   function generateNewUrl() {
     uniqueId = crypto.randomUUID();
-    const baseUrl = window.location.origin;
+    const baseUrl = PUBLIC_BASE_URL || window.location.origin;
     webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
     curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -d '{"message":"Hello World"}'`;
   }
