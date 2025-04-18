@@ -16,6 +16,16 @@ export const toasts = writable<ToastNotification[]>([]);
 // Toast configuration
 const TOAST_DISPLAY_TIME = 10000; // 10 seconds in milliseconds
 
+// Function to generate a unique ID with fallback for browsers that don't support crypto.randomUUID()
+function generateUniqueId(): string {
+  try {
+    return crypto.randomUUID();
+  } catch {
+    // Fallback for browsers that don't support crypto.randomUUID()
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
+  }
+}
+
 // Function to add a new toast notification from a webhook event
 export function addToast(webhookEvent: WebhookEvent) {
   // Only add toast for webhook events with proper structure
@@ -30,10 +40,11 @@ export function addToast(webhookEvent: WebhookEvent) {
   // even if the webhook contains multiple events
   if (payload.events && payload.events.length > 0) {
     const event = payload.events[0]; // Get only the first event
+    const toastId = generateUniqueId();
     
     toasts.update(currentToasts => {
       const newToast: ToastNotification = {
-        id: crypto.randomUUID(),
+        id: toastId,
         event: event,
         timestamp: webhookEvent.timestamp,
         read: false,
@@ -46,12 +57,21 @@ export function addToast(webhookEvent: WebhookEvent) {
     
     // Auto-hide toast after 10 seconds
     setTimeout(() => {
-      dismissToast(event);
+      dismissToastById(toastId);
     }, TOAST_DISPLAY_TIME);
   }
 }
 
-// Function to dismiss a toast
+// Function to dismiss a toast by its ID (more reliable than object reference)
+export function dismissToastById(toastId: string) {
+  toasts.update(currentToasts => 
+    currentToasts.map(toast => 
+      toast.id === toastId ? { ...toast, visible: false } : toast
+    )
+  );
+}
+
+// Function to dismiss a toast by event (for backward compatibility)
 export function dismissToast(event: WebhookEventData) {
   toasts.update(currentToasts => 
     currentToasts.map(toast => 
