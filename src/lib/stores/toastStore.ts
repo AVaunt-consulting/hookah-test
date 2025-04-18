@@ -54,15 +54,18 @@ export function addToast(webhookEvent: WebhookEvent) {
   
   // Check different possible structures for the message
   if (messageObject) {
-    // Check direct value in message object
-    if ('value' in messageObject && messageObject.value) {
-      messageContent = String(messageObject.value);
-      console.log('Debug: Found direct value in message:', messageContent);
-    }
-    // Check nested content.value structure
-    else if (messageObject.content && messageObject.content.value) {
+    // Primary extraction path: Check nested content.value structure
+    if (messageObject.content && 
+        typeof messageObject.content === 'object' && 
+        'value' in messageObject.content && 
+        messageObject.content.value) {
       messageContent = String(messageObject.content.value);
-      console.log('Debug: Found nested content.value in message:', messageContent);
+      console.log('Debug: Found nested content.value in message (PRIMARY):', messageContent);
+    }
+    // Fallback: Check direct value in message object
+    else if ('value' in messageObject && messageObject.value) {
+      messageContent = String(messageObject.value);
+      console.log('Debug: Found direct value in message (fallback):', messageContent);
     }
     else {
       console.log('Debug: Message object found but no recognizable value structure. Keys:', Object.keys(messageObject));

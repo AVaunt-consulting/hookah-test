@@ -29,15 +29,18 @@
       console.log('Debug: Found rootMessageObject:', rootMsgObj);
       
       if (rootMsgObj && typeof rootMsgObj === 'object') {
-        if ('value' in rootMsgObj) {
-          message = String(rootMsgObj.value);
-          console.log('Debug: Extracted value from rootMessageObject:', message);
-        } else if ('content' in rootMsgObj && 
-                  rootMsgObj.content && 
-                  typeof rootMsgObj.content === 'object' && 
-                  'value' in rootMsgObj.content) {
+        // Primary path: extract content.value (this is where the message body is stored)
+        if ('content' in rootMsgObj && 
+            rootMsgObj.content && 
+            typeof rootMsgObj.content === 'object' && 
+            'value' in rootMsgObj.content) {
           message = String(rootMsgObj.content.value);
-          console.log('Debug: Extracted content.value from rootMessageObject:', message);
+          console.log('Debug: Extracted content.value from rootMessageObject (PRIMARY):', message);
+        } 
+        // Fallback: direct value
+        else if ('value' in rootMsgObj) {
+          message = String(rootMsgObj.value);
+          console.log('Debug: Extracted value from rootMessageObject (fallback):', message);
         }
       }
     }

@@ -83,26 +83,27 @@
         console.log('Debug: Found message property:', message);
         
         // Handle structure like { message: { content: { value: "Text" } } }
+        // This is the primary message body location we want to extract
         if (message && typeof message === 'object' && 
             'content' in message && 
             message.content && 
             typeof message.content === 'object' && 
             'value' in message.content) {
           const messageValue = String(message.content.value);
-          console.log('Debug: Extracted message value from content:', messageValue);
+          console.log('Debug: Extracted message value from content (primary):', messageValue);
           return messageValue;
         }
         
         // Check for direct value property in message object
         if (message && typeof message === 'object' && 'value' in message) {
           const directValue = String(message.value);
-          console.log('Debug: Extracted direct value from message object:', directValue);
+          console.log('Debug: Extracted direct value from message object (fallback):', directValue);
           return directValue;
         }
         
         // Direct string value
         if (typeof message === 'string') {
-          console.log('Debug: Message is a direct string:', message);
+          console.log('Debug: Message is a direct string (fallback):', message);
           return message;
         }
 
@@ -126,10 +127,21 @@
   $: console.log('Debug: Root message from event:', rootMessage);
   $: console.log('Debug: Direct message from event object:', event.message);
   $: hasRootMessageObject = 'rootMessageObject' in event && event.rootMessageObject !== undefined;
-  $: rootMessageObjectValue = hasRootMessageObject && 
+  
+  // Extract the content.value from rootMessageObject (this is where the actual message body is stored)
+  $: rootMessageContentValue = hasRootMessageObject && 
+     typeof event.rootMessageObject === 'object' &&
+     event.rootMessageObject.content &&
+     typeof event.rootMessageObject.content === 'object' &&
+     'value' in event.rootMessageObject.content ? 
+     String(event.rootMessageObject.content.value) : undefined;
+  
+  // Also extract direct value for comparison
+  $: rootMessageDirectValue = hasRootMessageObject && 
      typeof event.rootMessageObject === 'object' &&
      'value' in event.rootMessageObject ? 
      String(event.rootMessageObject.value) : undefined;
+  
   $: message = event.message || rootMessage || generateMessage(event);
   $: messageSource = event.message ? 'event' : (rootMessage ? 'root' : 'generated');
   $: console.log('Debug: Final message being displayed:', message);
@@ -183,18 +195,21 @@
             <div class="text-sm text-gray-600 dark:text-gray-300">
               <span class="font-medium">Amount:</span> {amount}
             </div>
-            {#if rootMessage}
+            
+            {#if rootMessageContentValue}
+            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto">
+              <span class="font-medium">Message Body:</span> 
+              <span class="inline-block max-w-full">{rootMessageContentValue}</span>
+            </div>
+            {/if}
+            
+            {#if rootMessage && rootMessage !== rootMessageContentValue}
             <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto">
               <span class="font-medium">Root Message:</span> 
               <span class="inline-block max-w-full">{rootMessage}</span>
             </div>
             {/if}
-            {#if rootMessageObjectValue && rootMessageObjectValue !== rootMessage}
-            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto">
-              <span class="font-medium">Direct Value:</span> 
-              <span class="inline-block max-w-full">{rootMessageObjectValue}</span>
-            </div>
-            {/if}
+            
             <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-24 overflow-y-auto">
               <span class="font-medium">Message:</span> 
               <span class="inline-block max-w-full">{message || "No message found"}</span>
