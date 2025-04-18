@@ -15,7 +15,28 @@
     uniqueId = crypto.randomUUID();
     const baseUrl = PUBLIC_BASE_URL || window.location.origin;
     webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
-    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -d '{"message":"Hello World"}'`;
+    
+    // Updated example payload
+    const examplePayload = {
+      eventWatcherId: "watch_123456789",
+      transactionId: "tx_abcdef1234567890",
+      events: [
+        {
+          data: {
+            type: "Decimal",
+            value: "123.456"
+          },
+          emitter: {
+            globalEmitter: "global_address_123",
+            methodEmitter: "method_001",
+            outerEmitter: "outer_001"
+          },
+          eventName: "TokenTransfer"
+        }
+      ]
+    };
+    
+    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -d '${JSON.stringify(examplePayload)}'`;
   }
 
   function copyToClipboard() {
@@ -97,8 +118,12 @@
   <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
     <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Testing your webhook</h2>
     
+    <p class="mb-2 text-gray-700 dark:text-gray-300">
+      You can quickly test your webhook URL with curl using the Radix webhook event structure:
+    </p>
+    
     <p class="mb-4 text-gray-700 dark:text-gray-300">
-      You can quickly test your webhook URL with curl:
+      The payload should include <code>eventWatcherId</code>, <code>transactionId</code>, and an array of <code>events</code> with SBOR data.
     </p>
     
     <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded overflow-x-auto">

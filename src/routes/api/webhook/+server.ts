@@ -1,8 +1,26 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import type { ProgrammaticScryptoSborValue } from '$lib/types/sbor';
+import { validateWebhookPayload } from '$lib/validation/schema';
 
 // Store for webhook events (would use a database in production)
 let webhookEvents: WebhookEvent[] = [];
+
+export interface WebhookEventData {
+  data: ProgrammaticScryptoSborValue;
+  emitter: {
+    globalEmitter: string;
+    methodEmitter: string;
+    outerEmitter: string;
+  };
+  eventName: string;
+}
+
+export interface WebhookPayload {
+  eventWatcherId: string;
+  transactionId: string;
+  events: WebhookEventData[];
+}
 
 export type WebhookEvent = {
   id: string;
@@ -10,7 +28,7 @@ export type WebhookEvent = {
   method: string;
   headers: Record<string, string>;
   query: Record<string, string>;
-  body: string | Record<string, unknown> | null;
+  body: WebhookPayload | string | Record<string, unknown> | null;
   path: string;
 };
 
@@ -32,10 +50,18 @@ export const POST: RequestHandler = async ({ request, url }) => {
   });
 
   let body = null;
+  let validationResult = { valid: true };
+  
   try {
     const contentType = request.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
-      body = await request.json();
+      const rawBody = await request.json();
+      
+      // Validate against the webhook payload schema
+      validationResult = validateWebhookPayload(rawBody);
+      
+      // Store the body regardless of validation result
+      body = rawBody;
     } else {
       body = await request.text();
     }
@@ -56,7 +82,12 @@ export const POST: RequestHandler = async ({ request, url }) => {
   // Add to the beginning of the array to show newest first
   webhookEvents = [event, ...webhookEvents].slice(0, 100); // Limit to 100 events
 
-  return json({ success: true, message: 'Webhook received', id: event.id });
+  return json({ 
+    success: true, 
+    message: validationResult.valid ? 'Webhook received' : 'Webhook received with validation errors',
+    id: event.id,
+    validationResult
+  });
 };
 
 // DELETE handler to clear all webhook events
