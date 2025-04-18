@@ -14,8 +14,7 @@ const config = {
 		},
 		prerender: {
 			entries: ['/', '/generate', '/requests', '/notification-demo']
-		},
-		trailingSlash: 'always'
+		}
 	}
 };
 
