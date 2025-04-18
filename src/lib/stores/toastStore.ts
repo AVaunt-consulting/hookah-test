@@ -1,6 +1,14 @@
 import { writable } from 'svelte/store';
 import type { WebhookEvent, WebhookEventData } from '../../routes/api/webhook/+server';
 
+// Define field structure
+interface Field {
+  value: string;
+  kind: string;
+  field_name?: string;
+  type_name?: string;
+}
+
 // Define the message object structure
 interface MessageObject {
   type?: string;
@@ -61,18 +69,35 @@ export function addToast(webhookEvent: WebhookEvent) {
   const messageObject = payload.message;
   console.log('ADD TOAST: Extracted message object:', JSON.stringify(messageObject, null, 2));
   
-  // Only process the first event in the webhook payload
+  // Make sure we have events
   if (payload.events && payload.events.length > 0) {
-    // Get the base event
+    // Get the base event (first event)
     const baseEvent = payload.events[0];
     console.log('ADD TOAST: Base event:', baseEvent.eventName);
     
+    // Find the first event with a ResourceAddress field if it exists
+    // This helps ensure we show resource info in the notification
+    const resourceEvent = payload.events.find(event => {
+      if (event.data?.fields) {
+        return event.data.fields.some((field: Field) => 
+          field.type_name === 'ResourceAddress' && 
+          field.kind === 'Reference' && 
+          field.value && 
+          field.value.startsWith('resource_')
+        );
+      }
+      return false;
+    });
+    
+    // Use resource event if found, otherwise use base event
+    const eventToUse = resourceEvent || baseEvent;
+    console.log('ADD TOAST: Using event for notification:', eventToUse.eventName);
+    
     // Create extended event with rootMessageObject
     const extendedEvent: ExtendedWebhookEventData = {
-      ...baseEvent,
+      ...eventToUse,
       rootMessageObject: messageObject
     };
-    console.log('ADD TOAST: Added rootMessageObject to event:', extendedEvent.rootMessageObject !== undefined);
     
     if (extendedEvent.rootMessageObject?.content?.value) {
       console.log('ADD TOAST: Message content value is available:', extendedEvent.rootMessageObject.content.value);
