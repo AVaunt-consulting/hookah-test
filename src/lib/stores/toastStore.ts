@@ -25,8 +25,10 @@ export function addToast(webhookEvent: WebhookEvent) {
   
   const payload = webhookEvent.body as { events: WebhookEventData[] };
   
-  // Process each event in the webhook payload
-  payload.events.forEach(event => {
+  // Only process the first event in the webhook payload
+  if (payload.events && payload.events.length > 0) {
+    const event = payload.events[0]; // Get only the first event
+    
     toasts.update(currentToasts => {
       const newToast: ToastNotification = {
         id: crypto.randomUUID(),
@@ -44,7 +46,7 @@ export function addToast(webhookEvent: WebhookEvent) {
     setTimeout(() => {
       dismissToast(event);
     }, TOAST_DISPLAY_TIME);
-  });
+  }
 }
 
 // Function to dismiss a toast
