@@ -9,22 +9,21 @@
 const RADIX_MAINNET_GATEWAY_URL = 'https://mainnet.radixdlt.com';
 
 // Define types for API responses
+interface MetadataValue {
+  typed: {
+    value: string;
+    type: string;
+  };
+}
+
 interface MetadataItem {
   key: string;
-  value: string;
-}
-
-interface EntityMetadata {
-  items: MetadataItem[];
-}
-
-interface EntityDetails {
-  address: string;
-  metadata?: EntityMetadata;
+  value: MetadataValue;
 }
 
 interface EntityResponse {
-  items: EntityDetails[];
+  items: MetadataItem[];
+  address: string;
 }
 
 interface ResourceMetadata {
@@ -43,11 +42,11 @@ export async function fetchResourceDetails(resourceAddress: string): Promise<Ent
     const response = await fetch(`${RADIX_MAINNET_GATEWAY_URL}/state/entity/page/metadata`, {
       method: 'POST',
       headers: {
+        'accept': 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        addresses: [resourceAddress],
-        aggregation_level: "global"
+        address: resourceAddress
       })
     });
 
@@ -75,29 +74,24 @@ export function extractResourceMetadata(apiResponse: EntityResponse | null): Res
       return { name: 'Unknown Resource', iconUrl: null };
     }
 
-    const item = apiResponse.items[0];
-    
-    // Check if metadata exists
-    if (!item.metadata?.items) {
-      return { name: 'Unknown Resource', iconUrl: null };
-    }
-    
     // Extract resource name
     let name = 'Unknown Resource';
-    const nameMetadata = item.metadata.items.find((meta: MetadataItem) => 
-      meta.key === 'name' || meta.key === 'symbol'
-    );
-    if (nameMetadata) {
-      name = nameMetadata.value;
+    const nameItem = apiResponse.items.find(item => item.key === 'name');
+    if (nameItem?.value?.typed?.value) {
+      name = nameItem.value.typed.value;
+    } else {
+      // Try finding symbol as fallback
+      const symbolItem = apiResponse.items.find(item => item.key === 'symbol');
+      if (symbolItem?.value?.typed?.value) {
+        name = symbolItem.value.typed.value;
+      }
     }
     
     // Extract icon URL
     let iconUrl = null;
-    const iconMetadata = item.metadata.items.find((meta: MetadataItem) => 
-      meta.key === 'icon_url' || meta.key === 'icon'
-    );
-    if (iconMetadata) {
-      iconUrl = iconMetadata.value;
+    const iconItem = apiResponse.items.find(item => item.key === 'icon_url');
+    if (iconItem?.value?.typed?.value) {
+      iconUrl = iconItem.value.typed.value;
     }
     
     return { name, iconUrl };
