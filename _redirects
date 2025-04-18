@@ -1,4 +1,5 @@
 # SvelteKit function path for internal app routes
+/ /.netlify/functions/sveltekit-render 200
 /generate /.netlify/functions/sveltekit-render/generate 200
 /requests /.netlify/functions/sveltekit-render/requests 200
 /requests/* /.netlify/functions/sveltekit-render/requests/:splat 200
