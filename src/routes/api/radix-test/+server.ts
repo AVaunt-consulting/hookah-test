@@ -4,7 +4,7 @@ import { fetchResourceDetails, extractResourceMetadata } from '$lib/api/radixApi
 
 /**
  * GET handler to test the Radix API for a specific resource
- * Example: /api/radix-test?address=resource_rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3vwcz9
+ * Example: /api/radix-test?address=resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd
  */
 export const GET: RequestHandler = async ({ url }) => {
   const resourceAddress = url.searchParams.get('address');

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   
-  let resourceAddress = 'resource_rdx1qspx7zxmnrh36q33av24srdfzg7m3cj65968erpjuh7ja3rm3vwcz9';
+  let resourceAddress = 'resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd';
   let apiResponse: any = null;
   let isLoading = false;
   let error: string | null = null;
