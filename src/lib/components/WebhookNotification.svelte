@@ -113,8 +113,11 @@
   
   // Generate a message from event data or root message
   $: rootMessage = getRootMessage();
+  $: console.log('Debug: Root message from event:', rootMessage);
+  $: console.log('Debug: Direct message from event object:', event.message);
   $: message = event.message || rootMessage || generateMessage(event);
-  $: console.log('Debug: Final message being displayed:', message, 'from sources - event.message:', event.message, 'rootMessage:', rootMessage);
+  $: messageSource = event.message ? 'event' : (rootMessage ? 'root' : 'generated');
+  $: console.log('Debug: Final message being displayed:', message);
   
   function generateMessage(evt: Event): string {
     // Try to generate a meaningful message from the event data
@@ -168,6 +171,7 @@
             <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-24 overflow-y-auto">
               <span class="font-medium">Message:</span> 
               <span class="inline-block max-w-full">{message || "No message found"}</span>
+              <span class="text-xs text-gray-400 ml-1">[{messageSource}]</span>
             </div>
             <div class="flex justify-end">
               <span class="inline-flex rounded-md text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">

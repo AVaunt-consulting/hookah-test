@@ -7,6 +7,8 @@
   function convertToNotificationEvent(webhookEvent: WebhookEventData) {
     if (!webhookEvent) return null;
     
+    console.log('Debug: Converting webhook event to notification:', webhookEvent);
+    
     const fields = Array.isArray(webhookEvent.data?.fields) 
       ? webhookEvent.data.fields 
       : [];
@@ -18,19 +20,24 @@
     // Check for root message first (from the message field in the webhook payload root)
     if ('rootMessage' in webhookEvent) {
       message = webhookEvent.rootMessage;
+      console.log('Debug: Using rootMessage from event:', message);
     }
     
     // Try to extract a message from direct message.value at root level if present
     if (!message && 'rootMessageObject' in webhookEvent) {
       const rootMsgObj = webhookEvent.rootMessageObject;
+      console.log('Debug: Found rootMessageObject:', rootMsgObj);
+      
       if (rootMsgObj && typeof rootMsgObj === 'object') {
         if ('value' in rootMsgObj) {
           message = String(rootMsgObj.value);
+          console.log('Debug: Extracted value from rootMessageObject:', message);
         } else if ('content' in rootMsgObj && 
                   rootMsgObj.content && 
                   typeof rootMsgObj.content === 'object' && 
                   'value' in rootMsgObj.content) {
           message = String(rootMsgObj.content.value);
+          console.log('Debug: Extracted content.value from rootMessageObject:', message);
         }
       }
     }
