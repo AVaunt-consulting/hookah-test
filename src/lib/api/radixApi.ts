@@ -74,16 +74,16 @@ export function extractResourceMetadata(apiResponse: EntityResponse | null): Res
       return { name: 'Unknown Resource', iconUrl: null };
     }
 
-    // Extract resource name
+    // Extract resource name - prioritize symbol over name
     let name = 'Unknown Resource';
-    const nameItem = apiResponse.items.find(item => item.key === 'name');
-    if (nameItem?.value?.typed?.value) {
-      name = nameItem.value.typed.value;
+    const symbolItem = apiResponse.items.find(item => item.key === 'symbol');
+    if (symbolItem?.value?.typed?.value) {
+      name = symbolItem.value.typed.value;
     } else {
-      // Try finding symbol as fallback
-      const symbolItem = apiResponse.items.find(item => item.key === 'symbol');
-      if (symbolItem?.value?.typed?.value) {
-        name = symbolItem.value.typed.value;
+      // Try finding name as fallback
+      const nameItem = apiResponse.items.find(item => item.key === 'name');
+      if (nameItem?.value?.typed?.value) {
+        name = nameItem.value.typed.value;
       }
     }
     
