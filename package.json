@@ -4,10 +4,9 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"preinstall": "npx pnpm use --global && npm pkg get dependencies && npm pkg get devDependencies",
 		"dev": "vite dev",
-		"build": "vite build",
-		"postbuild": "node scripts/copy-files.js",
+		"build": "vite build || exit 1",
+		"postbuild": "node scripts/copy-files.js || exit 1",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
@@ -62,6 +61,10 @@
 	},
 	"pnpm": {
 		"onlyBuiltDependencies": [
+			"esbuild"
+		],
+		"allowScripts": [
+			"svelte-preprocess",
 			"esbuild"
 		]
 	}

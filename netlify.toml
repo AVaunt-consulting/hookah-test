@@ -1,5 +1,5 @@
 [build]
-  command = "pnpm install --no-frozen-lockfile && pnpm run build"
+  command = "pnpm install --no-frozen-lockfile --no-optional && pnpm run build"
   publish = ".netlify/functions-internal"
 
 [dev]
