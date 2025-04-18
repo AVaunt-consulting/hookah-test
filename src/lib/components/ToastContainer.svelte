@@ -73,7 +73,9 @@
       },
       message,
       rootMessage: 'rootMessage' in webhookEvent ? (webhookEvent as any).rootMessage : undefined,
-      rootMessageObject: 'rootMessageObject' in webhookEvent ? (webhookEvent as any).rootMessageObject : undefined
+      rootMessageObject: 'rootMessageObject' in webhookEvent ? (webhookEvent as any).rootMessageObject : undefined,
+      // Explicitly add the content.value for direct access
+      messageContentValue: message // This will contain the extracted content.value
     };
     
     console.log('Debug: Final notification event object:', JSON.stringify(result, null, 2));

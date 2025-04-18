@@ -32,6 +32,7 @@
     data: EventData;
     message?: string; // Optional message field
     rootMessage?: string; // Optional root message field
+    messageContentValue?: string; // Direct message content value
     rootMessageObject?: {
       type?: string;
       content?: {
@@ -146,8 +147,11 @@
      'value' in event.rootMessageObject ? 
      String(event.rootMessageObject.value) : undefined;
   
-  $: message = event.message || rootMessage || generateMessage(event);
-  $: messageSource = event.message ? 'event' : (rootMessage ? 'root' : 'generated');
+  $: message = event.messageContentValue || rootMessageContentValue || event.message || rootMessage || generateMessage(event);
+  $: messageSource = event.messageContentValue ? 'direct_content_value' : 
+     (rootMessageContentValue ? 'content.value' : 
+     (event.message ? 'event' : 
+     (rootMessage ? 'root' : 'generated')));
   $: console.log('Debug: Final message being displayed:', message);
   
   // Debug output all message sources

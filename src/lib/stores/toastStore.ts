@@ -95,10 +95,13 @@ export function addToast(webhookEvent: WebhookEvent) {
       event = {
         ...event,
         rootMessage: messageContent,
-        rootMessageObject: messageObject
+        rootMessageObject: messageObject,
+        // Add direct access to the content value
+        messageContentValue: messageContent
       } as WebhookEventData & { 
         rootMessage?: string; 
-        rootMessageObject?: typeof messageObject 
+        rootMessageObject?: typeof messageObject;
+        messageContentValue?: string;
       };
     }
     
