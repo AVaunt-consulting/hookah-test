@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webhook Tester - Loading...</title>
+    <title>Webhook Tester</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -41,17 +41,39 @@
             margin: 10px 0 0;
             color: #7f8c8d;
         }
+        .main-content {
+            text-align: center;
+            max-width: 800px;
+            padding: 20px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <div class="loading">
-        <div class="spinner"></div>
+    <div class="main-content">
         <h1>Webhook Tester</h1>
-        <p>Loading application...</p>
+        <p>A simple tool to test webhook integrations</p>
+        
+        <div class="features">
+            <h2>Features</h2>
+            <ul style="text-align: left;">
+                <li>Generate webhook URLs</li>
+                <li>Inspect incoming webhook requests</li>
+                <li>View headers, query parameters, and body</li>
+                <li>Test your integrations</li>
+            </ul>
+        </div>
+        
+        <a href="/generate" class="button">Generate a webhook URL</a>
     </div>
-    <script>
-        // Redirect to SvelteKit app
-        window.location.href = "/";
-    </script>
 </body>
 </html> 
