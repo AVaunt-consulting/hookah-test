@@ -13,6 +13,9 @@ export interface ToastNotification {
 // Create writable store for toast notifications
 export const toasts = writable<ToastNotification[]>([]);
 
+// Toast configuration
+const TOAST_DISPLAY_TIME = 10000; // 10 seconds in milliseconds
+
 // Function to add a new toast notification from a webhook event
 export function addToast(webhookEvent: WebhookEvent) {
   // Only add toast for webhook events with proper structure
@@ -37,10 +40,10 @@ export function addToast(webhookEvent: WebhookEvent) {
       return [newToast, ...currentToasts].slice(0, 10); // Keep only the 10 most recent toasts
     });
     
-    // Auto-hide toast after 5 seconds
+    // Auto-hide toast after 10 seconds
     setTimeout(() => {
       dismissToast(event);
-    }, 5000);
+    }, TOAST_DISPLAY_TIME);
   });
 }
 
