@@ -39,8 +39,9 @@
     return `${emitter.substring(0, 11)}...${emitter.substring(emitter.length - 5)}`;
   }
 
-  // Extract account ID from the globalEmitter - truncated format
-  $: accountId = truncateEmitter(event.emitter.globalEmitter.split('_')[1] || '');
+  // Extract and truncate the full globalEmitter
+  $: truncatedEmitter = truncateEmitter(event.emitter.globalEmitter);
+  $: fullEmitter = event.emitter.globalEmitter;
   
   // Find the amount field in the data fields
   $: amountField = event.data.fields?.find(field => field.field_name === 'amount') || 
@@ -65,7 +66,9 @@
         </div>
         <div class="ml-3 flex-1">
           <p class="text-sm font-medium text-gray-900 dark:text-white">
-            {event.eventName} <span class="text-gray-500 dark:text-gray-400 text-xs">({accountId})</span>
+            {event.eventName} <span class="text-gray-500 dark:text-gray-400 text-xs group relative">
+              <span title={fullEmitter}>({truncatedEmitter})</span>
+            </span>
           </p>
           <div class="mt-2 flex justify-between items-center">
             <div class="text-sm text-gray-600 dark:text-gray-300">
