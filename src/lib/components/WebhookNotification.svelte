@@ -1,5 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
+  import { get } from 'svelte/store';
+  import { webhookEvents } from '$lib/stores/webhookStore';
   
   const dispatch = createEventDispatcher();
 
@@ -49,8 +51,47 @@
                    event.data.fields?.find(field => field.kind === 'Decimal');
   $: amount = amountField?.value || '0';
   
-  // Generate a message from event data
-  $: message = event.message || generateMessage(event);
+  // Function to check for a root message in the latest webhook event
+  function getRootMessage(): string | undefined {
+    try {
+      // Get the latest webhook event
+      const events = get(webhookEvents);
+      if (events.length === 0) return undefined;
+      
+      const latestEvent = events[0];
+      
+      // Check if it has a message property at the root level
+      if (latestEvent.body && 
+          typeof latestEvent.body === 'object' && 
+          'message' in latestEvent.body) {
+        
+        const message = latestEvent.body.message;
+        
+        // Handle structure like { message: { content: { value: "Text" } } }
+        if (message && typeof message === 'object' && 
+            'content' in message && 
+            message.content && 
+            typeof message.content === 'object' && 
+            'value' in message.content) {
+          return String(message.content.value);
+        }
+        
+        // Direct string value
+        if (typeof message === 'string') {
+          return message;
+        }
+      }
+      
+      return undefined;
+    } catch (error) {
+      console.error('Error getting root message:', error);
+      return undefined;
+    }
+  }
+  
+  // Generate a message from event data or root message
+  $: rootMessage = getRootMessage();
+  $: message = event.message || rootMessage || generateMessage(event);
   
   function generateMessage(evt: Event): string {
     // Try to generate a meaningful message from the event data
