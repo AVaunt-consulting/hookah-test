@@ -24,16 +24,6 @@
   command = "pnpm run dev"
   port = 5173 
 
-[[redirects]]
-  from = "/*"
-  to = "/.netlify/functions/server"
-  status = 200
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/server"
-  status = 200
-
 [functions]
   included_files = ["!node_modules/**, !.git/**"]
   external_node_modules = ["@sveltejs/kit", "svelte", "svelte/internal"] 
