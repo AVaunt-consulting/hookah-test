@@ -13,7 +13,7 @@ const config = {
 			base: ''
 		},
 		prerender: {
-			entries: ['/', '/generate', '/requests', '/notification-demo']
+			entries: ['/', '/generate', '/requests']
 		}
 	}
 };
