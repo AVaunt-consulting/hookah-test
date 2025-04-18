@@ -1,6 +1,5 @@
 <script lang="ts">
 	import '../app.css';
-	import ToastContainer from '$lib/components/ToastContainer.svelte';
 	import { onMount } from 'svelte';
 	import { fetchWebhookEvents } from '$lib/stores/webhookStore';
 	
@@ -41,6 +40,5 @@
 		<slot />
 	</main>
 	
-	<!-- Toast notifications will appear on every page -->
-	<ToastContainer />
+	<!-- Toast container was here but has been removed -->
 </div>
