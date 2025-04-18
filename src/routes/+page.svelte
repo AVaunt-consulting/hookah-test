@@ -2,7 +2,7 @@
   <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Hookah Webhook Test and Debug Tool</h1>
   
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">What is this tool?</h2>
+    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">What does this tool do?</h2>
     <p class="mb-4 text-gray-700 dark:text-gray-300">
       This is a simple webhook testing tool that allows you to generate unique webhook URLs and inspect incoming webhook requests in real-time.
     </p>
@@ -16,7 +16,7 @@
       <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">How to use</h2>
       <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
         <li>Go to the <a href="/generate" class="text-blue-600 dark:text-blue-400 hover:underline">Generate URL</a> page</li>
-        <li>Copy your unique webhook URL</li>
+        <li>Copy your unique webhook URL and paste the URL on the Hookah website</li>
         <li>Configure your service to send webhooks to this URL</li>
         <li>View incoming webhook requests in real-time</li>
       </ul>
