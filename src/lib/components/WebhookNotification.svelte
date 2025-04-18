@@ -33,8 +33,14 @@
   export let event: Event;
   export let standalone = false; // Whether this is a standalone notification or in a container
 
-  // Extract account ID from the globalEmitter
-  $: accountId = event.emitter.globalEmitter.split('_')[1]?.substring(0, 8) || '';
+  // Function to truncate globalEmitter to first 11 chars + ellipsis + last 5 chars
+  function truncateEmitter(emitter: string): string {
+    if (!emitter || emitter.length <= 16) return emitter;
+    return `${emitter.substring(0, 11)}...${emitter.substring(emitter.length - 5)}`;
+  }
+
+  // Extract account ID from the globalEmitter - truncated format
+  $: accountId = truncateEmitter(event.emitter.globalEmitter.split('_')[1] || '');
   
   // Find the amount field in the data fields
   $: amountField = event.data.fields?.find(field => field.field_name === 'amount') || 
