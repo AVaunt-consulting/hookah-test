@@ -1,0 +1,57 @@
+{
+  "transactionId": "txid_rdx1h5xtp40dg8rz6lvwqhtfyfx4t3cdrfmz0gvya9npm73ztwj34t5s599ju0",
+  "triggerId": "81d2ccd4-274a-4f16-a5bd-8812fd958929",
+  "events": [
+    {
+      "eventName": "DepositEvent",
+      "emitter": {
+        "globalEmitter": "account_rdx12y9rw7kkgs6t56fthrv70s58fszt7atjnsdvaygwu75t7q27lngp9v",
+        "methodEmitter": "internal_vault_rdx1tp3gaegecmu7vxr4yx48fkjqsy33837kyy5ugk9we0kzdewt72spwn",
+        "outerEmitter": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd"
+      },
+      "data": {
+        "fields": [
+          {
+            "value": "20",
+            "kind": "Decimal",
+            "field_name": "amount"
+          }
+        ],
+        "kind": "Tuple",
+        "type_name": "DepositEvent"
+      }
+    },
+    {
+      "eventName": "DepositEvent",
+      "emitter": {
+        "globalEmitter": "account_rdx12y9rw7kkgs6t56fthrv70s58fszt7atjnsdvaygwu75t7q27lngp9v",
+        "methodEmitter": "account_rdx12y9rw7kkgs6t56fthrv70s58fszt7atjnsdvaygwu75t7q27lngp9v"
+      },
+      "data": {
+        "variant_id": "0",
+        "variant_name": "Fungible",
+        "fields": [
+          {
+            "value": "resource_rdx1tknxxxxxxxxxradxrdxxxxxxxxx009923554798xxxxxxxxxradxrd",
+            "kind": "Reference",
+            "type_name": "ResourceAddress"
+          },
+          {
+            "value": "20",
+            "kind": "Decimal"
+          }
+        ],
+        "kind": "Enum",
+        "type_name": "DepositEvent"
+      }
+    }
+  ],
+  "message": {
+    "type": "Plaintext",
+    "content": {
+      "type": "String",
+      "value": "Sent via ShardSpace"
+    },
+    "mime_type": "text/plain"
+  }
+} 
