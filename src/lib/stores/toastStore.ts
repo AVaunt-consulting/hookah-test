@@ -30,8 +30,11 @@ function generateUniqueId(): string {
 export function addToast(webhookEvent: WebhookEvent) {
   // Only add toast for webhook events with proper structure
   if (!webhookEvent.body || typeof webhookEvent.body !== 'object' || !('events' in webhookEvent.body)) {
+    console.log('Debug: Webhook body is not properly structured:', webhookEvent.body);
     return;
   }
+  
+  console.log('Debug: FULL WEBHOOK BODY:', JSON.stringify(webhookEvent.body, null, 2));
   
   const payload = webhookEvent.body as { 
     events: WebhookEventData[],
@@ -50,7 +53,7 @@ export function addToast(webhookEvent: WebhookEvent) {
   let messageContent: string | undefined = undefined;
   const messageObject = payload.message;
   
-  console.log('Debug: Raw message object:', messageObject);
+  console.log('Debug: Raw message object structure:', messageObject ? JSON.stringify(messageObject, null, 2) : 'undefined');
   
   // Check different possible structures for the message
   if (messageObject) {
@@ -69,12 +72,15 @@ export function addToast(webhookEvent: WebhookEvent) {
     }
     else {
       console.log('Debug: Message object found but no recognizable value structure. Keys:', Object.keys(messageObject));
+      if (messageObject.content) {
+        console.log('Debug: Content object keys:', Object.keys(messageObject.content));
+      }
     }
   } else {
     console.log('Debug: No message object found in payload');
   }
   
-  console.log('Debug: Final extracted message content:', messageContent);
+  console.log('Debug: Final extracted messageContent:', messageContent);
   
   // Only process the first event in the webhook payload
   // This is intentional - we only want to show one notification per webhook,

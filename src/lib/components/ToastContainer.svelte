@@ -7,7 +7,7 @@
   function convertToNotificationEvent(webhookEvent: WebhookEventData) {
     if (!webhookEvent) return null;
     
-    console.log('Debug: Converting webhook event to notification:', webhookEvent);
+    console.log('Debug: Converting webhook event to notification (FULL EVENT):', JSON.stringify(webhookEvent, null, 2));
     
     const fields = Array.isArray(webhookEvent.data?.fields) 
       ? webhookEvent.data.fields 
@@ -26,7 +26,7 @@
     // Try to extract a message from direct message.value at root level if present
     if (!message && 'rootMessageObject' in webhookEvent) {
       const rootMsgObj = webhookEvent.rootMessageObject;
-      console.log('Debug: Found rootMessageObject:', rootMsgObj);
+      console.log('Debug: Found rootMessageObject (FULL OBJECT):', JSON.stringify(rootMsgObj, null, 2));
       
       if (rootMsgObj && typeof rootMsgObj === 'object') {
         // Primary path: extract content.value (this is where the message body is stored)
@@ -63,7 +63,7 @@
       }
     }
     
-    return {
+    const result = {
       eventName: webhookEvent.eventName || 'Unknown Event',
       emitter: webhookEvent.emitter || { globalEmitter: 'unknown' },
       data: {
@@ -71,8 +71,14 @@
         kind,
         type_name: typeName
       },
-      message
+      message,
+      rootMessage: 'rootMessage' in webhookEvent ? (webhookEvent as any).rootMessage : undefined,
+      rootMessageObject: 'rootMessageObject' in webhookEvent ? (webhookEvent as any).rootMessageObject : undefined
     };
+    
+    console.log('Debug: Final notification event object:', JSON.stringify(result, null, 2));
+    
+    return result;
   }
 </script>
 

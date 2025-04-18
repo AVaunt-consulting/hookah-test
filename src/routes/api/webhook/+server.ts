@@ -57,6 +57,26 @@ export const POST: RequestHandler = async ({ request, url }) => {
     if (contentType && contentType.includes('application/json')) {
       const rawBody = await request.json();
       
+      // Debug the incoming message structure
+      console.log('Debug: Incoming webhook JSON payload:', JSON.stringify(rawBody, null, 2));
+      
+      // Check if there's a message.content.value in the payload
+      if (rawBody && typeof rawBody === 'object' && 'message' in rawBody) {
+        const messageObj = rawBody.message;
+        console.log('Debug: Found message object in webhook:', JSON.stringify(messageObj, null, 2));
+        
+        if (messageObj && typeof messageObj === 'object' && 'content' in messageObj) {
+          const contentObj = messageObj.content;
+          console.log('Debug: Found content object in message:', JSON.stringify(contentObj, null, 2));
+          
+          if (contentObj && typeof contentObj === 'object' && 'value' in contentObj) {
+            console.log('Debug: Found value in content object:', contentObj.value);
+          } else {
+            console.log('Debug: No value found in content object');
+          }
+        }
+      }
+      
       // Validate against the webhook payload schema
       validationResult = validateWebhookPayload(rawBody);
       

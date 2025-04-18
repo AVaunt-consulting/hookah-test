@@ -136,6 +136,10 @@
      'value' in event.rootMessageObject.content ? 
      String(event.rootMessageObject.content.value) : undefined;
   
+  $: console.log('Debug: Has rootMessageObject?', hasRootMessageObject);
+  $: console.log('Debug: rootMessageObject:', event.rootMessageObject);
+  $: console.log('Debug: rootMessageContentValue:', rootMessageContentValue);
+  
   // Also extract direct value for comparison
   $: rootMessageDirectValue = hasRootMessageObject && 
      typeof event.rootMessageObject === 'object' &&
@@ -145,6 +149,16 @@
   $: message = event.message || rootMessage || generateMessage(event);
   $: messageSource = event.message ? 'event' : (rootMessage ? 'root' : 'generated');
   $: console.log('Debug: Final message being displayed:', message);
+  
+  // Debug output all message sources
+  $: console.log('Debug: ALL MESSAGE SOURCES', {
+    event_message: event.message,
+    rootMessage: rootMessage,
+    rootMessageContentValue: rootMessageContentValue,
+    rootMessageDirectValue: rootMessageDirectValue,
+    message: message,
+    messageSource: messageSource
+  });
   
   function generateMessage(evt: Event): string {
     // Try to generate a meaningful message from the event data
@@ -195,6 +209,13 @@
             <div class="text-sm text-gray-600 dark:text-gray-300">
               <span class="font-medium">Amount:</span> {amount}
             </div>
+            
+            {#if hasRootMessageObject && typeof event.rootMessageObject === 'object' && event.rootMessageObject.content && typeof event.rootMessageObject.content === 'object' && 'value' in event.rootMessageObject.content}
+            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto border border-blue-200 p-2 rounded">
+              <span class="font-medium">Message Content Value:</span> 
+              <span class="inline-block max-w-full">{event.rootMessageObject.content.value}</span>
+            </div>
+            {/if}
             
             {#if rootMessageContentValue}
             <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto">
