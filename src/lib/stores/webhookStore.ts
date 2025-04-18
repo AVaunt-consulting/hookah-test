@@ -2,10 +2,46 @@ import { writable } from 'svelte/store';
 import type { WebhookEvent } from '../../routes/api/webhook/+server';
 import { addToast } from './toastStore';
 
-export const webhookEvents = writable<WebhookEvent[]>([]);
+// Local storage key for webhook events
+const STORAGE_KEY = 'webhookEvents';
+const MAX_STORED_EVENTS = 100;
+
+// Initialize the store with data from localStorage if available
+const initialEvents = loadFromLocalStorage();
+
+export const webhookEvents = writable<WebhookEvent[]>(initialEvents);
 export const isLoading = writable<boolean>(false);
 export const error = writable<string>('');
-export const lastEventTimestamp = writable<string>('');
+export const lastEventTimestamp = writable<string>(localStorage.getItem('lastEventTimestamp') || '');
+
+// Load webhook events from localStorage
+function loadFromLocalStorage(): WebhookEvent[] {
+  try {
+    const storedData = localStorage.getItem(STORAGE_KEY);
+    if (storedData) {
+      return JSON.parse(storedData);
+    }
+  } catch (error) {
+    console.error('Error loading webhook events from localStorage:', error);
+  }
+  return [];
+}
+
+// Save webhook events to localStorage
+function saveToLocalStorage(events: WebhookEvent[]) {
+  try {
+    // Limit the number of events stored to prevent excessive storage use
+    const eventsToStore = events.slice(0, MAX_STORED_EVENTS);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(eventsToStore));
+  } catch (error) {
+    console.error('Error saving webhook events to localStorage:', error);
+  }
+}
+
+// Subscribe to the store and save changes to localStorage
+webhookEvents.subscribe(events => {
+  saveToLocalStorage(events);
+});
 
 export async function fetchWebhookEvents() {
   try {
@@ -28,11 +64,13 @@ export async function fetchWebhookEvents() {
       
       // If there are new events (newer than the last timestamp we've seen)
       if (!lastTimestamp || mostRecentTimestamp > lastTimestamp) {
-        // Find new events that are newer than the last one we've seen
-        const newEvents = lastTimestamp
-          ? data.filter((event: WebhookEvent) => event.timestamp > lastTimestamp)
-          : [data[0]]; // Only show toast for the most recent event on first load
-          
+        // Compare with stored events to find truly new ones
+        const storedEvents = loadFromLocalStorage();
+        const storedIds = new Set(storedEvents.map(e => e.id));
+        
+        // Filter to only include events that don't already exist in our local storage
+        const newEvents = data.filter((event: WebhookEvent) => !storedIds.has(event.id));
+        
         // Create toast notifications for new events
         newEvents.forEach((event: WebhookEvent) => {
           addToast(event);
@@ -40,6 +78,7 @@ export async function fetchWebhookEvents() {
       }
     }
     
+    // Update the store with the new data
     webhookEvents.set(data);
     error.set('');
   } catch (err) {
@@ -58,7 +97,9 @@ export async function clearWebhookEvents() {
       throw new Error('Failed to clear webhook events');
     }
     
+    // Clear both the store and localStorage
     webhookEvents.set([]);
+    localStorage.removeItem(STORAGE_KEY);
     error.set('');
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -68,6 +109,8 @@ export async function clearWebhookEvents() {
 }
 
 export function filterWebhookEvents(filterId: string) {
+  // This function doesn't modify localStorage directly
+  // as it's a temporary filter that doesn't affect the actual data
   webhookEvents.update(events => {
     if (!filterId) return events;
     return events.filter(event => event.query.id === filterId);
