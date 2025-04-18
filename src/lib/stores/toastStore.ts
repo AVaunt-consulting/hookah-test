@@ -1,10 +1,26 @@
 import { writable } from 'svelte/store';
 import type { WebhookEvent, WebhookEventData } from '../../routes/api/webhook/+server';
 
+// Define the message object structure
+interface MessageObject {
+  type?: string;
+  content?: {
+    type?: string;
+    value?: string;
+  };
+  value?: string;
+  mime_type?: string;
+}
+
+// Define extended WebhookEventData type with rootMessageObject
+interface ExtendedWebhookEventData extends WebhookEventData {
+  rootMessageObject?: MessageObject;
+}
+
 // Define toast notification type
 export interface ToastNotification {
   id: string;
-  event: WebhookEventData;
+  event: ExtendedWebhookEventData;
   timestamp: string;
   read: boolean;
   visible: boolean;
@@ -30,85 +46,34 @@ function generateUniqueId(): string {
 export function addToast(webhookEvent: WebhookEvent) {
   // Only add toast for webhook events with proper structure
   if (!webhookEvent.body || typeof webhookEvent.body !== 'object' || !('events' in webhookEvent.body)) {
-    console.log('Debug: Webhook body is not properly structured:', webhookEvent.body);
     return;
   }
   
-  console.log('Debug: FULL WEBHOOK BODY:', JSON.stringify(webhookEvent.body, null, 2));
-  
   const payload = webhookEvent.body as { 
     events: WebhookEventData[],
-    message?: {
-      type?: string,
-      content?: {
-        type?: string,
-        value?: string
-      },
-      value?: string,
-      mime_type?: string
-    }
+    message?: MessageObject
   };
   
-  // Extract message from the root level if it exists
-  let messageContent: string | undefined = undefined;
+  // Extract the message object to pass to the notification
   const messageObject = payload.message;
   
-  console.log('Debug: Raw message object structure:', messageObject ? JSON.stringify(messageObject, null, 2) : 'undefined');
-  
-  // Check different possible structures for the message
-  if (messageObject) {
-    // Primary extraction path: Check nested content.value structure
-    if (messageObject.content && 
-        typeof messageObject.content === 'object' && 
-        'value' in messageObject.content && 
-        messageObject.content.value) {
-      messageContent = String(messageObject.content.value);
-      console.log('Debug: Found nested content.value in message (PRIMARY):', messageContent);
-    }
-    // Fallback: Check direct value in message object
-    else if ('value' in messageObject && messageObject.value) {
-      messageContent = String(messageObject.value);
-      console.log('Debug: Found direct value in message (fallback):', messageContent);
-    }
-    else {
-      console.log('Debug: Message object found but no recognizable value structure. Keys:', Object.keys(messageObject));
-      if (messageObject.content) {
-        console.log('Debug: Content object keys:', Object.keys(messageObject.content));
-      }
-    }
-  } else {
-    console.log('Debug: No message object found in payload');
-  }
-  
-  console.log('Debug: Final extracted messageContent:', messageContent);
-  
   // Only process the first event in the webhook payload
-  // This is intentional - we only want to show one notification per webhook,
-  // even if the webhook contains multiple events
   if (payload.events && payload.events.length > 0) {
-    let event = payload.events[0]; // Get only the first event - using let to allow modification
-    const toastId = generateUniqueId();
+    // Get the base event
+    const baseEvent = payload.events[0];
     
-    // Add the root message and message object to the event if it exists
-    if (messageContent || messageObject) {
-      // Use type assertion to add the properties
-      event = {
-        ...event,
-        rootMessage: messageContent,
-        rootMessageObject: messageObject,
-        // Add direct access to the content value
-        messageContentValue: messageContent
-      } as WebhookEventData & { 
-        rootMessage?: string; 
-        rootMessageObject?: typeof messageObject;
-        messageContentValue?: string;
-      };
-    }
+    // Create extended event with rootMessageObject
+    const extendedEvent: ExtendedWebhookEventData = {
+      ...baseEvent,
+      rootMessageObject: messageObject
+    };
+    
+    const toastId = generateUniqueId();
     
     toasts.update(currentToasts => {
       const newToast: ToastNotification = {
         id: toastId,
-        event: event,
+        event: extendedEvent,
         timestamp: webhookEvent.timestamp,
         read: false,
         visible: true

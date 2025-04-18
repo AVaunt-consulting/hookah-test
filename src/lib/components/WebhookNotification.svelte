@@ -1,7 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from 'svelte';
-  import { get } from 'svelte/store';
-  import { webhookEvents } from '$lib/stores/webhookStore';
   
   const dispatch = createEventDispatcher();
 
@@ -30,18 +28,8 @@
     eventName: string;
     emitter: Emitter;
     data: EventData;
-    message?: string; // Optional message field
-    rootMessage?: string; // Optional root message field
-    messageContentValue?: string; // Direct message content value
-    rootMessageObject?: {
-      type?: string;
-      content?: {
-        type?: string;
-        value?: string;
-      };
-      value?: string;
-      mime_type?: string;
-    }; // Optional rootMessageObject field
+    // Simplified message structure
+    messageValue?: string; // The value from message.content.value
   }
 
   export let event: Event;
@@ -62,108 +50,7 @@
                    event.data.fields?.find(field => field.kind === 'Decimal');
   $: amount = amountField?.value || '0';
   
-  // Function to check for a root message in the latest webhook event
-  function getRootMessage(): string | undefined {
-    try {
-      // Get the latest webhook event
-      const events = get(webhookEvents);
-      if (events.length === 0) {
-        console.log('Debug: No events found in webhookEvents store');
-        return undefined;
-      }
-      
-      const latestEvent = events[0];
-      console.log('Debug: Latest event:', latestEvent);
-      
-      // Check if it has a message property at the root level
-      if (latestEvent.body && 
-          typeof latestEvent.body === 'object' && 
-          'message' in latestEvent.body) {
-        
-        const message = latestEvent.body.message;
-        console.log('Debug: Found message property:', message);
-        
-        // Handle structure like { message: { content: { value: "Text" } } }
-        // This is the primary message body location we want to extract
-        if (message && typeof message === 'object' && 
-            'content' in message && 
-            message.content && 
-            typeof message.content === 'object' && 
-            'value' in message.content) {
-          const messageValue = String(message.content.value);
-          console.log('Debug: Extracted message value from content (primary):', messageValue);
-          return messageValue;
-        }
-        
-        // Check for direct value property in message object
-        if (message && typeof message === 'object' && 'value' in message) {
-          const directValue = String(message.value);
-          console.log('Debug: Extracted direct value from message object (fallback):', directValue);
-          return directValue;
-        }
-        
-        // Direct string value
-        if (typeof message === 'string') {
-          console.log('Debug: Message is a direct string (fallback):', message);
-          return message;
-        }
-
-        console.log('Debug: Message found but structure not recognized:', message);
-      } else {
-        console.log('Debug: No message property found in event body:', latestEvent.body);
-      }
-      
-      return undefined;
-    } catch (error) {
-      console.error('Error getting root message:', error);
-      return undefined;
-    }
-  }
-  
-  // Direct debug for current event
-  $: console.log('Debug: Current event being rendered:', event);
-  
-  // Generate a message from event data or root message
-  $: rootMessage = getRootMessage();
-  $: console.log('Debug: Root message from event:', rootMessage);
-  $: console.log('Debug: Direct message from event object:', event.message);
-  $: hasRootMessageObject = 'rootMessageObject' in event && event.rootMessageObject !== undefined;
-  
-  // Extract the content.value from rootMessageObject (this is where the actual message body is stored)
-  $: rootMessageContentValue = hasRootMessageObject && 
-     typeof event.rootMessageObject === 'object' &&
-     event.rootMessageObject.content &&
-     typeof event.rootMessageObject.content === 'object' &&
-     'value' in event.rootMessageObject.content ? 
-     String(event.rootMessageObject.content.value) : undefined;
-  
-  $: console.log('Debug: Has rootMessageObject?', hasRootMessageObject);
-  $: console.log('Debug: rootMessageObject:', event.rootMessageObject);
-  $: console.log('Debug: rootMessageContentValue:', rootMessageContentValue);
-  
-  // Also extract direct value for comparison
-  $: rootMessageDirectValue = hasRootMessageObject && 
-     typeof event.rootMessageObject === 'object' &&
-     'value' in event.rootMessageObject ? 
-     String(event.rootMessageObject.value) : undefined;
-  
-  $: message = event.messageContentValue || rootMessageContentValue || event.message || rootMessage || generateMessage(event);
-  $: messageSource = event.messageContentValue ? 'direct_content_value' : 
-     (rootMessageContentValue ? 'content.value' : 
-     (event.message ? 'event' : 
-     (rootMessage ? 'root' : 'generated')));
-  $: console.log('Debug: Final message being displayed:', message);
-  
-  // Debug output all message sources
-  $: console.log('Debug: ALL MESSAGE SOURCES', {
-    event_message: event.message,
-    rootMessage: rootMessage,
-    rootMessageContentValue: rootMessageContentValue,
-    rootMessageDirectValue: rootMessageDirectValue,
-    message: message,
-    messageSource: messageSource
-  });
-  
+  // Generate a basic message if no custom message is available
   function generateMessage(evt: Event): string {
     // Try to generate a meaningful message from the event data
     const resourceField = evt.data.fields?.find(field => field.type_name === 'ResourceAddress');
@@ -186,6 +73,9 @@
       return `${evt.eventName}${typeName ? ' of type ' + typeName : ''}${amount !== '0' ? ' with amount ' + amount : ''}`;
     }
   }
+  
+  // Use either the provided message value or generate a default one
+  $: displayMessage = event.messageValue || generateMessage(event);
   
   // Handle dismissal
   function handleDismiss() {
@@ -214,32 +104,11 @@
               <span class="font-medium">Amount:</span> {amount}
             </div>
             
-            {#if hasRootMessageObject && typeof event.rootMessageObject === 'object' && event.rootMessageObject.content && typeof event.rootMessageObject.content === 'object' && 'value' in event.rootMessageObject.content}
-            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto border border-blue-200 p-2 rounded">
-              <span class="font-medium">Message Content Value:</span> 
-              <span class="inline-block max-w-full">{event.rootMessageObject.content.value}</span>
-            </div>
-            {/if}
-            
-            {#if rootMessageContentValue}
-            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto">
-              <span class="font-medium">Message Body:</span> 
-              <span class="inline-block max-w-full">{rootMessageContentValue}</span>
-            </div>
-            {/if}
-            
-            {#if rootMessage && rootMessage !== rootMessageContentValue}
-            <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-20 overflow-y-auto">
-              <span class="font-medium">Root Message:</span> 
-              <span class="inline-block max-w-full">{rootMessage}</span>
-            </div>
-            {/if}
-            
             <div class="text-sm text-gray-600 dark:text-gray-300 break-words max-h-24 overflow-y-auto">
               <span class="font-medium">Message:</span> 
-              <span class="inline-block max-w-full">{message || "No message found"}</span>
-              <span class="text-xs text-gray-400 ml-1">[{messageSource}]</span>
+              <span class="inline-block max-w-full">{displayMessage}</span>
             </div>
+            
             <div class="flex justify-end">
               <span class="inline-flex rounded-md text-xs px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                 {event.data.kind || "Transaction"}
