@@ -33,14 +33,39 @@ export function addToast(webhookEvent: WebhookEvent) {
     return;
   }
   
-  const payload = webhookEvent.body as { events: WebhookEventData[] };
+  const payload = webhookEvent.body as { 
+    events: WebhookEventData[],
+    message?: {
+      type?: string,
+      content?: {
+        type?: string,
+        value?: string
+      },
+      mime_type?: string
+    }
+  };
+  
+  // Extract message from the root level if it exists
+  let messageContent: string | undefined = undefined;
+  if (payload.message && payload.message.content && payload.message.content.value) {
+    messageContent = String(payload.message.content.value);
+  }
   
   // Only process the first event in the webhook payload
   // This is intentional - we only want to show one notification per webhook,
   // even if the webhook contains multiple events
   if (payload.events && payload.events.length > 0) {
-    const event = payload.events[0]; // Get only the first event
+    let event = payload.events[0]; // Get only the first event - using let to allow modification
     const toastId = generateUniqueId();
+    
+    // Add the root message to the event if it exists
+    if (messageContent) {
+      // Use type assertion to add the rootMessage property
+      event = {
+        ...event,
+        rootMessage: messageContent
+      } as WebhookEventData & { rootMessage: string };
+    }
     
     toasts.update(currentToasts => {
       const newToast: ToastNotification = {

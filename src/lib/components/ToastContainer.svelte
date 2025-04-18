@@ -15,18 +15,25 @@
     let typeName = undefined;
     let message = undefined;
     
+    // Check for root message first (from the message field in the webhook payload root)
+    if ('rootMessage' in webhookEvent) {
+      message = webhookEvent.rootMessage;
+    }
+    
     if (webhookEvent.data && typeof webhookEvent.data === 'object' && webhookEvent.data !== null) {
       kind = 'kind' in webhookEvent.data ? String(webhookEvent.data.kind) : undefined;
       typeName = 'type_name' in webhookEvent.data ? String(webhookEvent.data.type_name) : undefined;
       
-      // Try to extract a message from the data if it exists
-      if ('message' in webhookEvent.data) {
-        message = String(webhookEvent.data.message);
-      } else if ('fields' in webhookEvent.data) {
-        // Check if any field has field_name 'message'
-        const messageField = fields.find(field => field.field_name === 'message');
-        if (messageField) {
-          message = messageField.value;
+      // Try to extract a message from the data if it exists and we don't already have a message
+      if (!message) {
+        if ('message' in webhookEvent.data) {
+          message = String(webhookEvent.data.message);
+        } else if ('fields' in webhookEvent.data) {
+          // Check if any field has field_name 'message'
+          const messageField = fields.find(field => field.field_name === 'message');
+          if (messageField) {
+            message = messageField.value;
+          }
         }
       }
     }
