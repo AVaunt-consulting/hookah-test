@@ -7,11 +7,31 @@
   let curlCommand = '';
   let isUrlGenerated = false;
 
+  onMount(() => {
+    // Check if we have a saved webhook URL in localStorage
+    const savedUniqueId = localStorage.getItem('webhookUniqueId');
+    if (savedUniqueId) {
+      uniqueId = savedUniqueId;
+      const baseUrl = window.location.origin;
+      webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
+      updateCurlCommand();
+      isUrlGenerated = true;
+    }
+  });
+
   function generateNewUrl() {
     uniqueId = crypto.randomUUID();
     const baseUrl = window.location.origin;
     webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
     
+    // Save to localStorage
+    localStorage.setItem('webhookUniqueId', uniqueId);
+    
+    updateCurlCommand();
+    isUrlGenerated = true;
+  }
+
+  function updateCurlCommand() {
     // Updated example payload
     const examplePayload = {
       eventWatcherId: "watch_123456789",
@@ -33,7 +53,6 @@
     };
     
     curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -d '${JSON.stringify(examplePayload)}'`;
-    isUrlGenerated = true;
   }
 
   function copyToClipboard() {
