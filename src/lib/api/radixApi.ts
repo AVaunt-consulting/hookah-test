@@ -40,9 +40,7 @@ interface ResourceMetadata {
  */
 export async function fetchResourceDetails(resourceAddress: string): Promise<EntityResponse | null> {
   try {
-    console.log(`RADIX API: Fetching details for ${resourceAddress}`);
-    
-    const response = await fetch(`${RADIX_MAINNET_GATEWAY_URL}/state/entity/details`, {
+    const response = await fetch(`${RADIX_MAINNET_GATEWAY_URL}/state/entity/page/metadata`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -58,11 +56,6 @@ export async function fetchResourceDetails(resourceAddress: string): Promise<Ent
     }
 
     const data = await response.json();
-    
-    // Log the full response
-    console.log('RADIX API: Full response for resource', resourceAddress);
-    console.log(JSON.stringify(data, null, 2));
-    
     return data as EntityResponse;
   } catch (error) {
     console.error('Error fetching resource details:', error);
@@ -79,24 +72,15 @@ export async function fetchResourceDetails(resourceAddress: string): Promise<Ent
 export function extractResourceMetadata(apiResponse: EntityResponse | null): ResourceMetadata {
   try {
     if (!apiResponse || !apiResponse.items || apiResponse.items.length === 0) {
-      console.log('RADIX API: No items found in API response');
       return { name: 'Unknown Resource', iconUrl: null };
     }
 
     const item = apiResponse.items[0];
-    console.log('RADIX API: Processing item with address:', item.address);
     
     // Check if metadata exists
     if (!item.metadata?.items) {
-      console.log('RADIX API: No metadata items found for resource');
       return { name: 'Unknown Resource', iconUrl: null };
     }
-    
-    // Log all metadata items for debugging
-    console.log('RADIX API: All metadata items:');
-    item.metadata.items.forEach(meta => {
-      console.log(`- ${meta.key}: ${meta.value}`);
-    });
     
     // Extract resource name
     let name = 'Unknown Resource';
@@ -105,9 +89,6 @@ export function extractResourceMetadata(apiResponse: EntityResponse | null): Res
     );
     if (nameMetadata) {
       name = nameMetadata.value;
-      console.log('RADIX API: Found name:', name);
-    } else {
-      console.log('RADIX API: No name or symbol found in metadata');
     }
     
     // Extract icon URL
@@ -117,12 +98,8 @@ export function extractResourceMetadata(apiResponse: EntityResponse | null): Res
     );
     if (iconMetadata) {
       iconUrl = iconMetadata.value;
-      console.log('RADIX API: Found icon URL:', iconUrl);
-    } else {
-      console.log('RADIX API: No icon URL found in metadata');
     }
     
-    console.log('RADIX API: Final resource metadata:', { name, iconUrl });
     return { name, iconUrl };
   } catch (error) {
     console.error('Error extracting resource metadata:', error);
