@@ -1,11 +1,12 @@
-# SvelteKit function path for internal app routes
-/ /.netlify/functions/sveltekit-render 200
+# SvelteKit function paths - ensure proper rendering for all routes
+/ /.netlify/functions/sveltekit-render 200!
 /generate /.netlify/functions/sveltekit-render/generate 200
 /requests /.netlify/functions/sveltekit-render/requests 200
 /requests/* /.netlify/functions/sveltekit-render/requests/:splat 200
+/notification-demo /.netlify/functions/sveltekit-render/notification-demo 200
 
 # API routes
 /api/* /.netlify/functions/sveltekit-render/api/:splat 200
 
 # SPA fallback - must be last
-/* /index.html 200
+/* /.netlify/functions/sveltekit-render/:splat 200
