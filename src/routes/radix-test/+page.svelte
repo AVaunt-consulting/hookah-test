@@ -38,10 +38,10 @@
 </script>
 
 <div class="max-w-6xl mx-auto p-6">
-  <h1 class="text-2xl font-bold mb-6">Radix Resource API Tester</h1>
+  <h1 class="text-2xl font-bold mb-6 text-white">Radix Resource API Tester</h1>
   
   <div class="mb-6">
-    <label class="block mb-2 font-medium">Resource Address</label>
+    <label class="block mb-2 font-medium text-white">Resource Address</label>
     <div class="flex">
       <input 
         bind:value={resourceAddress}
@@ -67,7 +67,7 @@
   
   {#if apiResponse}
     <div class="mb-6">
-      <h2 class="text-xl font-bold mb-2">Resource Metadata</h2>
+      <h2 class="text-xl font-bold mb-2 text-white">Resource Metadata</h2>
       <div class="bg-gray-100 p-4 rounded-lg">
         <p><strong>Name:</strong> {apiResponse.metadata.name}</p>
         {#if apiResponse.metadata.iconUrl}
@@ -82,7 +82,7 @@
     </div>
     
     <div>
-      <h2 class="text-xl font-bold mb-2">Full API Response</h2>
+      <h2 class="text-xl font-bold mb-2 text-white">Full API Response</h2>
       <pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto text-sm">
         {JSON.stringify(apiResponse, null, 2)}
       </pre>
