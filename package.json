@@ -6,7 +6,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"postbuild": "powershell -Command \"cp _redirects .netlify/functions-internal/ ; cp -r static/* .netlify/functions-internal/\"",
+		"postbuild": "node scripts/copy-files.js",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
