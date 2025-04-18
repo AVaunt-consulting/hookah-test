@@ -34,7 +34,10 @@
 
   export let event: Event;
   export let standalone = false; // Whether this is a standalone notification or in a container
-
+  
+  console.log('WEBHOOK NOTIFICATION: Rendered with event:', event.eventName);
+  console.log('WEBHOOK NOTIFICATION: messageValue:', event.messageValue);
+  
   // Function to truncate globalEmitter to first 11 chars + ellipsis + last 5 chars
   function truncateEmitter(emitter: string): string {
     if (!emitter || emitter.length <= 16) return emitter;
@@ -76,6 +79,8 @@
   
   // Use either the provided message value or generate a default one
   $: displayMessage = event.messageValue || generateMessage(event);
+  $: console.log('WEBHOOK NOTIFICATION: Using display message:', displayMessage, 
+      'Source:', event.messageValue ? 'messageValue' : 'generated');
   
   // Handle dismissal
   function handleDismiss() {

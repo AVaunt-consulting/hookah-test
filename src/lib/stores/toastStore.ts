@@ -44,8 +44,11 @@ function generateUniqueId(): string {
 
 // Function to add a new toast notification from a webhook event
 export function addToast(webhookEvent: WebhookEvent) {
+  console.log('ADD TOAST: Processing webhook event', webhookEvent.id);
+  
   // Only add toast for webhook events with proper structure
   if (!webhookEvent.body || typeof webhookEvent.body !== 'object' || !('events' in webhookEvent.body)) {
+    console.log('ADD TOAST: Invalid webhook body structure, missing events array');
     return;
   }
   
@@ -56,17 +59,26 @@ export function addToast(webhookEvent: WebhookEvent) {
   
   // Extract the message object to pass to the notification
   const messageObject = payload.message;
+  console.log('ADD TOAST: Extracted message object:', JSON.stringify(messageObject, null, 2));
   
   // Only process the first event in the webhook payload
   if (payload.events && payload.events.length > 0) {
     // Get the base event
     const baseEvent = payload.events[0];
+    console.log('ADD TOAST: Base event:', baseEvent.eventName);
     
     // Create extended event with rootMessageObject
     const extendedEvent: ExtendedWebhookEventData = {
       ...baseEvent,
       rootMessageObject: messageObject
     };
+    console.log('ADD TOAST: Added rootMessageObject to event:', extendedEvent.rootMessageObject !== undefined);
+    
+    if (extendedEvent.rootMessageObject?.content?.value) {
+      console.log('ADD TOAST: Message content value is available:', extendedEvent.rootMessageObject.content.value);
+    } else {
+      console.log('ADD TOAST: No message content value available in rootMessageObject');
+    }
     
     const toastId = generateUniqueId();
     
@@ -79,6 +91,9 @@ export function addToast(webhookEvent: WebhookEvent) {
         visible: true
       };
       
+      // Log the event in the toast before adding
+      console.log('ADD TOAST: Created toast with event ID:', extendedEvent.eventName);
+      
       // Add new toast to the beginning of the array
       return [newToast, ...currentToasts].slice(0, 10); // Keep only the 10 most recent toasts
     });
@@ -87,6 +102,8 @@ export function addToast(webhookEvent: WebhookEvent) {
     setTimeout(() => {
       dismissToastById(toastId);
     }, TOAST_DISPLAY_TIME);
+  } else {
+    console.log('ADD TOAST: No events found in webhook payload');
   }
 }
 

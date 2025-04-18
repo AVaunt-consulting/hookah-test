@@ -22,6 +22,8 @@
   function convertToNotificationEvent(webhookEvent: ExtendedWebhookEventData) {
     if (!webhookEvent) return null;
     
+    console.log('TOAST CONTAINER: Converting event to notification:', webhookEvent.eventName);
+    
     // Extract fields for the notification
     const fields = Array.isArray(webhookEvent.data?.fields) 
       ? webhookEvent.data.fields 
@@ -33,11 +35,18 @@
     
     // Extract message.content.value if it exists
     if (webhookEvent.rootMessageObject) {
+      console.log('TOAST CONTAINER: rootMessageObject found:', JSON.stringify(webhookEvent.rootMessageObject, null, 2));
+      
       const msgObj = webhookEvent.rootMessageObject;
       if (msgObj.content?.value) {
         // This is the primary location of the message in webhook
         messageValue = String(msgObj.content.value);
+        console.log('TOAST CONTAINER: Extracted message.content.value:', messageValue);
+      } else {
+        console.log('TOAST CONTAINER: No content.value found in rootMessageObject');
       }
+    } else {
+      console.log('TOAST CONTAINER: No rootMessageObject found in webhook event');
     }
     
     // Extract other data properties
@@ -46,8 +55,7 @@
       typeName = webhookEvent.data.type_name;
     }
     
-    // Return simplified event object
-    return {
+    const result = {
       eventName: webhookEvent.eventName || 'Unknown Event',
       emitter: webhookEvent.emitter || { globalEmitter: 'unknown' },
       data: {
@@ -57,6 +65,11 @@
       },
       messageValue
     };
+    
+    console.log('TOAST CONTAINER: Final notification event with messageValue:', 
+      messageValue ? `"${messageValue}"` : 'undefined');
+    
+    return result;
   }
 </script>
 
