@@ -73,43 +73,43 @@
     
     {#if isUrlGenerated}
       <div class="mb-6">
-        <div class="flex">
+        <div class="flex flex-col sm:flex-row">
           <input 
             type="text" 
             readonly
             value={webhookUrl}
-            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-l-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
+            class="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base mb-2 sm:mb-0"
           />
           <button 
             on:click={copyToClipboard}
-            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-r-lg transition duration-150 ease-in-out"
+            class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg sm:rounded-l-none sm:rounded-r-lg transition duration-150 ease-in-out text-sm sm:text-base"
           >
             {copied ? 'Copied!' : 'Copy'}
           </button>
         </div>
       </div>
 
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 sm:space-x-2">
         <button 
           on:click={generateNewUrl}
-          class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg text-gray-800 dark:text-white transition duration-150 ease-in-out"
+          class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg text-gray-800 dark:text-white transition duration-150 ease-in-out text-sm sm:text-base"
         >
           Generate New URL
         </button>
         
         <a 
           href="/requests?id={uniqueId}" 
-          class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-150 ease-in-out"
+          class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-150 ease-in-out text-center text-sm sm:text-base"
         >
           View Webhook Requests
         </a>
       </div>
     {:else}
-      <div class="text-center py-8">
-        <p class="text-gray-700 dark:text-gray-300 mb-6">Click the button below to generate a unique webhook URL</p>
+      <div class="text-center py-6 sm:py-8">
+        <p class="text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 text-sm sm:text-base">Click the button below to generate a unique webhook URL</p>
         <button 
           on:click={generateNewUrl}
-          class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out"
+          class="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out text-sm sm:text-base"
         >
           Generate New URL
         </button>
@@ -117,46 +117,55 @@
     {/if}
   </div>
 
-  <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">How to use your webhook URL</h2>
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+    <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">How to use your webhook URL</h2>
     
-    <ol class="list-decimal list-inside space-y-4 text-gray-700 dark:text-gray-300">
+    <ol class="list-decimal list-inside space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-gray-300">
       <li>
         <strong>Copy your unique webhook URL</strong>
-        <p class="mt-1 ml-6">Use the button above to copy your webhook URL to the clipboard.</p>
+        <p class="mt-1 ml-4 sm:ml-6">Use the button above to copy your webhook URL to the clipboard.</p>
       </li>
       
       <li>
         <strong>Configure your service</strong>
-        <p class="mt-1 ml-6">Set up the service you want to test to send webhooks to this URL.</p>
+        <p class="mt-1 ml-4 sm:ml-6">Set up the service you want to test to send webhooks to this URL.</p>
       </li>
       
       <li>
         <strong>View incoming requests</strong>
-        <p class="mt-1 ml-6">Click the "View Webhook Requests" button to see webhook requests as they arrive.</p>
+        <p class="mt-1 ml-4 sm:ml-6">Click the "View Webhook Requests" button to see webhook requests as they arrive.</p>
       </li>
       
       <li>
         <strong>Test different HTTP methods</strong>
-        <p class="mt-1 ml-6">This URL accepts GET, POST, PUT, DELETE, and any other HTTP methods.</p>
+        <p class="mt-1 ml-4 sm:ml-6">This URL accepts GET, POST, PUT, DELETE, and any other HTTP methods.</p>
       </li>
     </ol>
   </div>
 
   {#if isUrlGenerated}
-    <div class="mt-8 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-      <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Testing your webhook</h2>
+    <div class="mt-6 sm:mt-8 bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+      <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Testing your webhook</h2>
       
-      <p class="mb-2 text-gray-700 dark:text-gray-300">
+      <p class="mb-2 text-sm sm:text-base text-gray-700 dark:text-gray-300">
         You can quickly test your webhook URL with curl using the Radix webhook event structure:
       </p>
       
-      <p class="mb-4 text-gray-700 dark:text-gray-300">
-        The payload should include <code>eventWatcherId</code>, <code>transactionId</code>, and an array of <code>events</code> with SBOR data.
+      <p class="mb-3 sm:mb-4 text-sm sm:text-base text-gray-700 dark:text-gray-300">
+        The payload should include <code class="text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">eventWatcherId</code>, <code class="text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">transactionId</code>, and an array of <code class="text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">events</code> with SBOR data.
       </p>
       
-      <div class="bg-gray-100 dark:bg-gray-900 p-4 rounded overflow-x-auto">
-        <pre class="text-sm text-gray-800 dark:text-gray-300">{curlCommand}</pre>
+      <div class="bg-gray-100 dark:bg-gray-900 p-3 sm:p-4 rounded overflow-x-auto">
+        <pre class="text-xs sm:text-sm text-gray-800 dark:text-gray-300 whitespace-pre-wrap sm:whitespace-pre">{curlCommand}</pre>
+      </div>
+      
+      <div class="mt-4 flex justify-end">
+        <button 
+          on:click={() => navigator.clipboard.writeText(curlCommand)}
+          class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out text-xs sm:text-sm"
+        >
+          Copy Curl Command
+        </button>
       </div>
     </div>
   {/if}
