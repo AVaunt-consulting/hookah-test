@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from '@sveltejs/kit';
+import { fetchResourceDetails, extractResourceMetadata } from '$lib/api/radixApi';
 
 // Note: In a production environment, you would implement a real Telegram bot
 // You need to create a bot via BotFather and get an API token
@@ -15,6 +16,55 @@ const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/send
 interface TelegramPayload {
   chatId: string;
   message: string;
+}
+
+// Helper function to extract resource address from message
+function extractResourceAddress(message: string): string | null {
+  const resourceMatch = message.match(/Resource: (resource_[a-zA-Z0-9]+)/);
+  return resourceMatch ? resourceMatch[1] : null;
+}
+
+// Helper function to enhance message with resource metadata
+async function enhanceMessageWithResourceMetadata(message: string): Promise<string> {
+  // Extract resource address if present
+  const resourceAddress = extractResourceAddress(message);
+  
+  if (!resourceAddress) {
+    return message; // No resource to enhance
+  }
+  
+  try {
+    // Fetch resource details from Radix API
+    const resourceDetails = await fetchResourceDetails(resourceAddress);
+    
+    if (!resourceDetails) {
+      return message; // No details found
+    }
+    
+    // Extract resource name and symbol
+    const metadata = extractResourceMetadata(resourceDetails);
+    
+    if (metadata.name === 'Unknown Resource') {
+      return message; // No useful metadata found
+    }
+    
+    // Replace the plain resource address with name and symbol
+    let resourceInfo = `${metadata.name}`;
+    
+    // Use symbol if it's different from name (some tokens use the same value for both)
+    if (metadata.name.toUpperCase() !== metadata.name) {
+      resourceInfo = `${metadata.name} (${metadata.name.toUpperCase()})`;
+    }
+    
+    // Replace the resource address line with enhanced information
+    return message.replace(
+      new RegExp(`Resource: ${resourceAddress}`), 
+      `Resource: ${resourceInfo} [${resourceAddress.substring(0, 10)}...${resourceAddress.substring(resourceAddress.length - 6)}]`
+    );
+  } catch (error) {
+    console.error('Error enhancing message with resource metadata:', error);
+    return message; // Return original message in case of error
+  }
 }
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -33,6 +83,9 @@ export const POST: RequestHandler = async ({ request }) => {
     }
     
     try {
+      // Enhance message with resource metadata
+      const enhancedMessage = await enhanceMessageWithResourceMetadata(payload.message);
+      
       // Send message using Telegram Bot API
       const response = await fetch(TELEGRAM_API_URL, {
         method: 'POST',
@@ -41,7 +94,7 @@ export const POST: RequestHandler = async ({ request }) => {
         },
         body: JSON.stringify({
           chat_id: payload.chatId,
-          text: payload.message,
+          text: enhancedMessage,
           parse_mode: 'HTML'
         }),
       });
