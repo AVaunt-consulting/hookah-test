@@ -128,8 +128,48 @@ export function generateNotificationMessage(webhookEvent: WebhookEvent): {
         const resourceField = resourceEvent.data.fields.find((field: Field) => 
           field.type_name === 'ResourceAddress' && field.kind === 'Reference'
         );
+        
         if (resourceField?.value) {
-          detailParts.push(`Resource: ${resourceField.value}`);
+          const resourceAddress = resourceField.value;
+          
+          // Try to find resource name and symbol in the payload
+          let resourceName = '';
+          let resourceSymbol = '';
+          
+          // Check for resource name fields in all events
+          for (const event of payload.events) {
+            if (event.data?.fields) {
+              // Look for name field
+              const nameField = event.data.fields.find((field: Field) => 
+                field.field_name === 'name' || 
+                (field.field_name === 'metadata' && field.value?.includes('name'))
+              );
+              if (nameField?.value) {
+                resourceName = String(nameField.value);
+              }
+              
+              // Look for symbol field
+              const symbolField = event.data.fields.find((field: Field) => 
+                field.field_name === 'symbol' || 
+                (field.field_name === 'metadata' && field.value?.includes('symbol'))
+              );
+              if (symbolField?.value) {
+                resourceSymbol = String(symbolField.value);
+              }
+            }
+          }
+          
+          // Construct the resource information
+          let resourceInfo = `Resource: ${resourceAddress}`;
+          if (resourceName && resourceSymbol) {
+            resourceInfo = `Resource: ${resourceName} (${resourceSymbol})`;
+          } else if (resourceName) {
+            resourceInfo = `Resource: ${resourceName}`;
+          } else if (resourceSymbol) {
+            resourceInfo = `Resource: ${resourceSymbol}`;
+          }
+          
+          detailParts.push(resourceInfo);
         }
       }
       
