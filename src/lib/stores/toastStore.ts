@@ -110,6 +110,13 @@ export function generateNotificationMessage(webhookEvent: WebhookEvent): {
         detailParts.push(`Type: ${eventToUse.eventName}`);
       }
       
+      // Include account address if available
+      if (eventToUse.emitter?.globalEmitter && eventToUse.emitter.globalEmitter.startsWith('account_')) {
+        const accountAddress = eventToUse.emitter.globalEmitter;
+        const shortAccount = `${accountAddress.substring(0, 15)}...${accountAddress.substring(accountAddress.length - 8)}`;
+        detailParts.push(`Account: ${shortAccount}`);
+      }
+      
       // Include message content if available
       if (messageObject?.content?.value) {
         detailParts.push(`Memo: ${messageObject.content.value}`);

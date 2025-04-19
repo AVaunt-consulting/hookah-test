@@ -24,47 +24,73 @@ function extractResourceAddress(message: string): string | null {
   return resourceMatch ? resourceMatch[1] : null;
 }
 
+// Helper function to extract account address from message
+function extractAccountAddress(message: string): string | null {
+  const accountMatch = message.match(/Account: (account_[a-zA-Z0-9]+\.\.\.)/);
+  if (accountMatch) {
+    // Extract the full address from the truncated form to get the original account
+    const truncatedAccount = accountMatch[1];
+    // Extract first part (before ellipsis)
+    const firstPart = truncatedAccount.substring(0, truncatedAccount.indexOf('...'));
+    if (firstPart.startsWith('account_')) {
+      return firstPart;
+    }
+  }
+  return null;
+}
+
 // Helper function to enhance message with resource metadata
 async function enhanceMessageWithResourceMetadata(message: string): Promise<string> {
+  let enhancedMessage = message;
+  
   // Extract resource address if present
   const resourceAddress = extractResourceAddress(message);
   
-  if (!resourceAddress) {
-    return message; // No resource to enhance
+  if (resourceAddress) {
+    try {
+      // Fetch resource details from Radix API
+      const resourceDetails = await fetchResourceDetails(resourceAddress);
+      
+      if (resourceDetails) {
+        // Extract resource name and symbol
+        const metadata = extractResourceMetadata(resourceDetails);
+        
+        if (metadata.name !== 'Unknown Resource') {
+          // Replace the plain resource address with name and symbol
+          let resourceInfo = `${metadata.name}`;
+          
+          // Use symbol if it's different from name (some tokens use the same value for both)
+          if (metadata.name.toUpperCase() !== metadata.name) {
+            resourceInfo = `${metadata.name} (${metadata.name.toUpperCase()})`;
+          }
+          
+          // Replace the resource address line with enhanced information
+          enhancedMessage = enhancedMessage.replace(
+            new RegExp(`Resource: ${resourceAddress}`), 
+            `Resource: ${resourceInfo} [${resourceAddress.substring(0, 10)}...${resourceAddress.substring(resourceAddress.length - 6)}]`
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Error enhancing message with resource metadata:', error);
+    }
   }
   
-  try {
-    // Fetch resource details from Radix API
-    const resourceDetails = await fetchResourceDetails(resourceAddress);
-    
-    if (!resourceDetails) {
-      return message; // No details found
+  // Extract and format the account address if present
+  const accountAddress = extractAccountAddress(message);
+  if (accountAddress) {
+    try {
+      // Format account address more nicely (may add account metadata here in future)
+      enhancedMessage = enhancedMessage.replace(
+        /Account: account_[a-zA-Z0-9]+\.\.\.[a-zA-Z0-9]+/,
+        `Account: ${accountAddress.substring(0, 15)}...${accountAddress.substring(accountAddress.length - 8)}`
+      );
+    } catch (error) {
+      console.error('Error enhancing account address:', error);
     }
-    
-    // Extract resource name and symbol
-    const metadata = extractResourceMetadata(resourceDetails);
-    
-    if (metadata.name === 'Unknown Resource') {
-      return message; // No useful metadata found
-    }
-    
-    // Replace the plain resource address with name and symbol
-    let resourceInfo = `${metadata.name}`;
-    
-    // Use symbol if it's different from name (some tokens use the same value for both)
-    if (metadata.name.toUpperCase() !== metadata.name) {
-      resourceInfo = `${metadata.name} (${metadata.name.toUpperCase()})`;
-    }
-    
-    // Replace the resource address line with enhanced information
-    return message.replace(
-      new RegExp(`Resource: ${resourceAddress}`), 
-      `Resource: ${resourceInfo} [${resourceAddress.substring(0, 10)}...${resourceAddress.substring(resourceAddress.length - 6)}]`
-    );
-  } catch (error) {
-    console.error('Error enhancing message with resource metadata:', error);
-    return message; // Return original message in case of error
   }
+  
+  return enhancedMessage;
 }
 
 export const POST: RequestHandler = async ({ request }) => {
