@@ -6,8 +6,8 @@ import type { RequestHandler } from '@sveltejs/kit';
 // For this demo, we'll just log the messages that would be sent
 
 // In a real implementation, you would define your bot token
-// const TELEGRAM_BOT_TOKEN = 'your_bot_token_here';
-// const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+ const TELEGRAM_BOT_TOKEN = '7512843852:AAETKyz_AYSq-2Tib8tJtVw318SDpvEL9XI';
+ const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
 interface TelegramPayload {
   chatId: string;
