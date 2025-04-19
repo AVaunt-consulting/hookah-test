@@ -83,7 +83,7 @@ async function enhanceMessageWithResourceMetadata(message: string): Promise<stri
       // Format account address more nicely (may add account metadata here in future)
       enhancedMessage = enhancedMessage.replace(
         /Account: account_[a-zA-Z0-9]+\.\.\.[a-zA-Z0-9]+/,
-        `Account: ${accountAddress.substring(0, 15)}...${accountAddress.substring(accountAddress.length - 8)}`
+        `Account: ${accountAddress.substring(0, 11)}...${accountAddress.substring(accountAddress.length - 5)}`
       );
     } catch (error) {
       console.error('Error enhancing account address:', error);
