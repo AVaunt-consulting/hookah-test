@@ -110,6 +110,20 @@ ID: ${queryId}`;
         }),
       });
     }
+    
+    // Send Telegram notification if enabled
+    if (settings.telegram.enabled && settings.telegram.chatId) {
+      await fetch('/api/notifications/telegram', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chatId: settings.telegram.chatId,
+          message,
+        }),
+      });
+    }
   } catch (error) {
     console.error('Failed to send notification:', error);
   }

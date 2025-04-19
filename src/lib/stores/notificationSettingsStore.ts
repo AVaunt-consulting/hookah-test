@@ -11,6 +11,10 @@ export interface NotificationSettings {
     enabled: boolean;
     phoneNumber: string;
   };
+  telegram: {
+    enabled: boolean;
+    chatId: string;
+  };
 }
 
 // Local storage key for notification settings
@@ -25,7 +29,8 @@ function getInitialSettings(): NotificationSettings {
     return {
       enabled: false,
       email: { enabled: false, address: '' },
-      sms: { enabled: false, phoneNumber: '' }
+      sms: { enabled: false, phoneNumber: '' },
+      telegram: { enabled: false, chatId: '' }
     };
   }
   
@@ -41,7 +46,8 @@ function getInitialSettings(): NotificationSettings {
   return {
     enabled: false,
     email: { enabled: false, address: '' },
-    sms: { enabled: false, phoneNumber: '' }
+    sms: { enabled: false, phoneNumber: '' },
+    telegram: { enabled: false, chatId: '' }
   };
 }
 
@@ -80,6 +86,17 @@ export function updateSmsSettings(phoneNumber: string, enabled: boolean) {
     ...current,
     sms: {
       phoneNumber,
+      enabled
+    }
+  }));
+}
+
+// Helper function to update Telegram settings
+export function updateTelegramSettings(chatId: string, enabled: boolean) {
+  notificationSettings.update(current => ({
+    ...current,
+    telegram: {
+      chatId,
       enabled
     }
   }));

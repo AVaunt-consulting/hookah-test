@@ -3,40 +3,50 @@
   import { 
     notificationSettings, 
     updateEmailSettings, 
-    updateSmsSettings, 
+    updateSmsSettings,
+    updateTelegramSettings,
     toggleNotifications 
   } from '$lib/stores/notificationSettingsStore';
   
   let emailAddress = '';
   let phoneNumber = '';
+  let telegramChatId = '';
   let notificationsEnabled = false;
   let emailEnabled = false;
   let smsEnabled = false;
+  let telegramEnabled = false;
   
   let emailSaveSuccess = false;
   let smsSaveSuccess = false;
+  let telegramSaveSuccess = false;
   
   let isTestingEmail = false;
   let isTestingSms = false;
+  let isTestingTelegram = false;
   let testEmailResult = '';
   let testSmsResult = '';
+  let testTelegramResult = '';
   
   // Load settings
   onMount(() => {
     emailAddress = $notificationSettings.email.address;
     phoneNumber = $notificationSettings.sms.phoneNumber;
+    telegramChatId = $notificationSettings.telegram.chatId;
     notificationsEnabled = $notificationSettings.enabled;
     emailEnabled = $notificationSettings.email.enabled;
     smsEnabled = $notificationSettings.sms.enabled;
+    telegramEnabled = $notificationSettings.telegram.enabled;
   });
   
   // Subscribe to store changes
   $: {
     emailAddress = $notificationSettings.email.address;
     phoneNumber = $notificationSettings.sms.phoneNumber;
+    telegramChatId = $notificationSettings.telegram.chatId;
     notificationsEnabled = $notificationSettings.enabled;
     emailEnabled = $notificationSettings.email.enabled;
     smsEnabled = $notificationSettings.sms.enabled;
+    telegramEnabled = $notificationSettings.telegram.enabled;
   }
   
   function saveEmailSettings() {
@@ -52,6 +62,14 @@
     smsSaveSuccess = true;
     setTimeout(() => {
       smsSaveSuccess = false;
+    }, 3000);
+  }
+  
+  function saveTelegramSettings() {
+    updateTelegramSettings(telegramChatId, telegramEnabled);
+    telegramSaveSuccess = true;
+    setTimeout(() => {
+      telegramSaveSuccess = false;
     }, 3000);
   }
   
@@ -128,6 +146,41 @@
       testSmsResult = `Error: ${error instanceof Error ? error.message : 'Failed to send test SMS'}`;
     } finally {
       isTestingSms = false;
+    }
+  }
+  
+  async function testTelegramNotification() {
+    if (!telegramChatId) {
+      testTelegramResult = 'Please enter a Telegram chat ID first';
+      return;
+    }
+    
+    isTestingTelegram = true;
+    testTelegramResult = '';
+    
+    try {
+      const response = await fetch('/api/notifications/telegram', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chatId: telegramChatId,
+          message: 'This is a test notification from your webhook service.',
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        testTelegramResult = 'Test Telegram notification sent successfully!';
+      } else {
+        testTelegramResult = `Error: ${result.error || 'Unknown error'}`;
+      }
+    } catch (error) {
+      testTelegramResult = `Error: ${error instanceof Error ? error.message : 'Failed to send Telegram message'}`;
+    } finally {
+      isTestingTelegram = false;
     }
   }
 </script>
@@ -267,6 +320,63 @@
           </p>
         {/if}
       </div>
+      
+      <!-- Telegram Notifications -->
+      <div class="border dark:border-gray-700 rounded-lg p-4">
+        <div class="flex items-center mb-4">
+          <input 
+            type="checkbox" 
+            id="telegram-toggle" 
+            bind:checked={telegramEnabled}
+            class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+          />
+          <label for="telegram-toggle" class="ml-2 text-lg font-medium text-gray-900 dark:text-white">Telegram Notifications</label>
+        </div>
+        
+        <div class="mb-4">
+          <label for="telegram-chat-id" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Telegram Chat ID</label>
+          <input 
+            type="text" 
+            id="telegram-chat-id" 
+            bind:value={telegramChatId}
+            placeholder="123456789" 
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            To get your Chat ID: 
+            <span class="block mt-1">1. Start a chat with <a href="https://t.me/userinfobot" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">@userinfobot</a> on Telegram</span>
+            <span class="block">2. The bot will reply with your Chat ID</span>
+          </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <button 
+            on:click={saveTelegramSettings}
+            disabled={!telegramChatId || isTestingTelegram}
+            class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+          >
+            Save Telegram Settings
+          </button>
+          
+          <button 
+            on:click={testTelegramNotification}
+            disabled={!telegramChatId || isTestingTelegram}
+            class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+          >
+            {isTestingTelegram ? 'Sending...' : 'Test Telegram Notification'}
+          </button>
+        </div>
+        
+        {#if telegramSaveSuccess}
+          <p class="mt-2 text-green-600 dark:text-green-400 text-sm">Settings saved successfully!</p>
+        {/if}
+        
+        {#if testTelegramResult}
+          <p class="mt-2 text-sm {testTelegramResult.includes('Error') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}">
+            {testTelegramResult}
+          </p>
+        {/if}
+      </div>
     </div>
   </div>
   
@@ -275,13 +385,18 @@
     
     <div class="space-y-4 text-gray-700 dark:text-gray-300 text-sm sm:text-base">
       <p>
-        When a new webhook event is received, you can be notified via email and/or SMS depending on your settings above.
+        When a new webhook event is received, you can be notified via email, SMS, and/or Telegram depending on your settings above.
       </p>
       
       <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 rounded">
         <p class="text-blue-800 dark:text-blue-200">
-          <strong>Note:</strong> This is a demonstration implementation. In a production environment, you would use a real email service (like SendGrid, Mailgun, etc.) and SMS provider (like Twilio or Vonage).
+          <strong>Note:</strong> This is a demonstration implementation. In a production environment, you would use real service providers:
         </p>
+        <ul class="list-disc pl-5 mt-2 space-y-1 text-blue-800 dark:text-blue-200">
+          <li>Email: SendGrid, Mailgun, Amazon SES</li>
+          <li>SMS: Twilio, Vonage (Nexmo)</li>
+          <li>Telegram: Official Telegram Bot API</li>
+        </ul>
       </div>
       
       <p>
