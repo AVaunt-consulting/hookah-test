@@ -322,5 +322,64 @@ response = requests.post(
         </div>
       </div>
     </div>
+
+    <div class="mt-6 sm:mt-8 bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+      <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Secure Authentication Testing</h2>
+      
+      <p class="mb-3 text-sm sm:text-base text-gray-700 dark:text-gray-300">
+        To test with token-based authentication instead of using <code class="text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">test=true</code>, use this curl command:
+      </p>
+      
+      <div class="bg-gray-100 dark:bg-gray-900 p-3 sm:p-4 rounded overflow-x-auto">
+        <pre class="text-xs sm:text-sm text-gray-800 dark:text-gray-300 whitespace-pre-wrap sm:whitespace-pre">{`curl -X POST ${window.location.origin}/api/webhook -H "Content-Type: application/json" -H "Authorization: Bearer ${$apiToken}" -d '${JSON.stringify({
+  eventWatcherId: "watch_123456789",
+  transactionId: "tx_abcdef1234567890",
+  events: [
+    {
+      data: {
+        type: "Decimal",
+        value: "123.456"
+      },
+      emitter: {
+        globalEmitter: "global_address_123",
+        methodEmitter: "method_001",
+        outerEmitter: "outer_001"
+      },
+      eventName: "TokenTransfer"
+    }
+  ]
+}, null, 2)}'`}</pre>
+      </div>
+      
+      <p class="mt-3 mb-2 text-sm text-gray-600 dark:text-gray-400">
+        <strong>Important:</strong> Note that this example removes the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">test=true</code> parameter and instead uses the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header with your token.
+      </p>
+      
+      <div class="mt-4 flex justify-end">
+        <button 
+          on:click={() => navigator.clipboard.writeText(`curl -X POST ${window.location.origin}/api/webhook -H "Content-Type: application/json" -H "Authorization: Bearer ${$apiToken}" -d '${JSON.stringify({
+  eventWatcherId: "watch_123456789",
+  transactionId: "tx_abcdef1234567890",
+  events: [
+    {
+      data: {
+        type: "Decimal",
+        value: "123.456"
+      },
+      emitter: {
+        globalEmitter: "global_address_123",
+        methodEmitter: "method_001",
+        outerEmitter: "outer_001"
+      },
+      eventName: "TokenTransfer"
+    }
+  ]
+}, null, 2)}'`)}
+          class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out text-xs sm:text-sm"
+        >
+          Copy Auth Command
+        </button>
+      </div>
+    </div>
   {/if}
 </div> 
