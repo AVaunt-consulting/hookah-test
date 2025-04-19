@@ -113,19 +113,28 @@ ID: ${queryId}`;
     
     // Send Telegram notification if enabled
     if (settings.telegram.enabled && settings.telegram.chatId) {
-      await fetch('/api/notifications/telegram', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          chatId: settings.telegram.chatId,
-          message,
-        }),
-      });
+      try {
+        const telegramResponse = await fetch('/api/notifications/telegram', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            chatId: settings.telegram.chatId,
+            message,
+          }),
+        });
+        
+        const telegramResult = await telegramResponse.json();
+        if (!telegramResult.success) {
+          console.error('Telegram notification failed:', telegramResult.error);
+        }
+      } catch (telegramError) {
+        console.error('Failed to send Telegram notification:', telegramError);
+      }
     }
   } catch (error) {
-    console.error('Failed to send notification:', error);
+    console.error('Failed to send notifications:', error);
   }
 }
 

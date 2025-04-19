@@ -343,9 +343,10 @@
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            To get your Chat ID: 
-            <span class="block mt-1">1. Start a chat with <a href="https://t.me/userinfobot" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">@userinfobot</a> on Telegram</span>
-            <span class="block">2. The bot will reply with your Chat ID</span>
+            To get started with Telegram notifications:
+            <span class="block mt-1">1. Start a chat with <a href="https://t.me/shardspace_bot" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">@shardspace_bot</a> on Telegram</span>
+            <span class="block">2. Get your Chat ID by chatting with <a href="https://t.me/userinfobot" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">@userinfobot</a></span>
+            <span class="block">3. Enter your Chat ID above and save settings</span>
           </p>
         </div>
         

@@ -6,7 +6,9 @@ import type { RequestHandler } from '@sveltejs/kit';
 // For this demo, we'll just log the messages that would be sent
 
 // Telegram Bot Configuration
-// The bot was created using BotFather (https://t.me/botfather)
+// Bot name: @shardspace_bot
+// Created via BotFather (https://t.me/botfather)
+// Users must first start a chat with this bot before they can receive messages
 const TELEGRAM_BOT_TOKEN = '7512843852:AAETKyz_AYSq-2Tib8tJtVw318SDpvEL9XI';
 const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
@@ -48,6 +50,22 @@ export const POST: RequestHandler = async ({ request }) => {
       
       if (!result.ok) {
         console.error('Telegram API error:', result);
+        
+        // Handle common Telegram errors
+        if (result.error_code === 403) {
+          return json({
+            success: false,
+            error: 'Bot cannot send messages to this chat. Please make sure you have started a chat with @shardspace_bot first.'
+          }, { status: 403 });
+        }
+        
+        if (result.error_code === 400 && result.description?.includes('chat not found')) {
+          return json({
+            success: false,
+            error: 'Chat ID not found. Please verify your Chat ID is correct and that you have started a chat with @shardspace_bot.'
+          }, { status: 400 });
+        }
+        
         throw new Error(result.description || 'Failed to send Telegram message');
       }
       
