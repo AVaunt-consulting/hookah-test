@@ -5,9 +5,10 @@ import type { RequestHandler } from '@sveltejs/kit';
 // You need to create a bot via BotFather and get an API token
 // For this demo, we'll just log the messages that would be sent
 
-// In a real implementation, you would define your bot token
- const TELEGRAM_BOT_TOKEN = '7512843852:AAETKyz_AYSq-2Tib8tJtVw318SDpvEL9XI';
- const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+// Telegram Bot Configuration
+// The bot was created using BotFather (https://t.me/botfather)
+const TELEGRAM_BOT_TOKEN = '7512843852:AAETKyz_AYSq-2Tib8tJtVw318SDpvEL9XI';
+const TELEGRAM_API_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
 
 interface TelegramPayload {
   chatId: string;
@@ -29,39 +30,47 @@ export const POST: RequestHandler = async ({ request }) => {
       return json({ success: false, error: 'Invalid Telegram chat ID format' }, { status: 400 });
     }
     
-    // In a real implementation, you would send an actual Telegram message
-    // Example code for reference:
-    /*
-    const response = await fetch(TELEGRAM_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        chat_id: payload.chatId,
-        text: payload.message,
-        parse_mode: 'HTML'
-      }),
-    });
-    
-    const result = await response.json();
-    
-    if (!result.ok) {
-      throw new Error(result.description || 'Failed to send Telegram message');
+    try {
+      // Send message using Telegram Bot API
+      const response = await fetch(TELEGRAM_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: payload.chatId,
+          text: payload.message,
+          parse_mode: 'HTML'
+        }),
+      });
+      
+      const result = await response.json();
+      
+      if (!result.ok) {
+        console.error('Telegram API error:', result);
+        throw new Error(result.description || 'Failed to send Telegram message');
+      }
+      
+      // Log successful message
+      console.log('Telegram message sent successfully to chat ID:', payload.chatId);
+      
+      // Return success response with Telegram API result
+      return json({ 
+        success: true, 
+        message: 'Telegram notification sent successfully',
+        chatId: payload.chatId,
+        telegramResponse: result
+      });
+    } catch (telegramError) {
+      console.error('Telegram API error:', telegramError);
+      return json(
+        { 
+          success: false, 
+          error: telegramError instanceof Error ? telegramError.message : 'Failed to send Telegram message'
+        }, 
+        { status: 500 }
+      );
     }
-    */
-    
-    // For now, we'll just log it
-    console.log('Telegram message would be sent:');
-    console.log(`Chat ID: ${payload.chatId}`);
-    console.log(`Message: ${payload.message}`);
-    
-    // Return success response
-    return json({ 
-      success: true, 
-      message: 'Telegram notification would be sent in production',
-      chatId: payload.chatId
-    });
     
   } catch (error) {
     console.error('Error processing Telegram notification:', error);
