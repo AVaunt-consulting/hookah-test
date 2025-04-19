@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 import type { WebhookEvent } from '../../routes/api/webhook/+server';
-import { addToast } from './toastStore';
+import { addToast, generateNotificationMessage } from './toastStore';
 import { notificationSettings } from './notificationSettingsStore';
 
 // Local storage key for webhook events
@@ -69,46 +69,57 @@ async function sendExternalNotification(event: WebhookEvent) {
   if (!settings.enabled) return;
   
   try {
-    // Get event info for the notification
-    const eventType = event.method;
-    const path = event.path;
-    const timestamp = new Date(event.timestamp).toLocaleString();
-    const queryId = event.query.id || 'unknown';
+    // Generate notification content using the shared generator
+    const { title, message } = generateNotificationMessage(event);
     
-    // Build notification message
-    const message = `New webhook event received:
-Type: ${eventType}
-Path: ${path}
-Time: ${timestamp}
-ID: ${queryId}`;
+    // Format the message with a title
+    const formattedMessage = `${title}\n\n${message}`;
 
     // Send email notification if enabled
     if (settings.email.enabled && settings.email.address) {
-      await fetch('/api/notifications/email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: settings.email.address,
-          subject: 'New Webhook Event Received',
-          message,
-        }),
-      });
+      try {
+        const emailResponse = await fetch('/api/notifications/email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: settings.email.address,
+            subject: title,
+            message: formattedMessage,
+          }),
+        });
+        
+        const emailResult = await emailResponse.json();
+        if (!emailResult.success) {
+          console.error('Email notification failed:', emailResult.error);
+        }
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError);
+      }
     }
     
     // Send SMS notification if enabled
     if (settings.sms.enabled && settings.sms.phoneNumber) {
-      await fetch('/api/notifications/sms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: settings.sms.phoneNumber,
-          message,
-        }),
-      });
+      try {
+        const smsResponse = await fetch('/api/notifications/sms', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            to: settings.sms.phoneNumber,
+            message: formattedMessage,
+          }),
+        });
+        
+        const smsResult = await smsResponse.json();
+        if (!smsResult.success) {
+          console.error('SMS notification failed:', smsResult.error);
+        }
+      } catch (smsError) {
+        console.error('Failed to send SMS notification:', smsError);
+      }
     }
     
     // Send Telegram notification if enabled
@@ -121,7 +132,7 @@ ID: ${queryId}`;
           },
           body: JSON.stringify({
             chatId: settings.telegram.chatId,
-            message,
+            message: formattedMessage,
           }),
         });
         

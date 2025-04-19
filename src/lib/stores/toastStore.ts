@@ -50,74 +50,117 @@ function generateUniqueId(): string {
   }
 }
 
+// Function to generate a notification message from a webhook event
+// This is exported so it can be used by both toast and external notifications
+export function generateNotificationMessage(webhookEvent: WebhookEvent): {
+  title: string;
+  message: string;
+  eventInfo: ExtendedWebhookEventData | null;
+} {
+  // Default return values
+  let eventInfo: ExtendedWebhookEventData | null = null;
+  let title = 'New Webhook Event';
+  let message = `Received ${webhookEvent.method} request at ${new Date(webhookEvent.timestamp).toLocaleString()}`;
+  
+  // Process event data if it exists
+  if (webhookEvent.body && typeof webhookEvent.body === 'object' && 'events' in webhookEvent.body) {
+    const payload = webhookEvent.body as { 
+      events: WebhookEventData[],
+      message?: MessageObject
+    };
+    
+    // Extract the message object
+    const messageObject = payload.message;
+    
+    // Process events if they exist
+    if (payload.events && payload.events.length > 0) {
+      // Get the base event (first event)
+      const baseEvent = payload.events[0];
+      
+      // Find the first event with a ResourceAddress field if it exists
+      const resourceEvent = payload.events.find(event => {
+        if (event.data?.fields) {
+          return event.data.fields.some((field: Field) => 
+            field.type_name === 'ResourceAddress' && 
+            field.kind === 'Reference' && 
+            field.value && 
+            field.value.startsWith('resource_')
+          );
+        }
+        return false;
+      });
+      
+      // Use resource event if found, otherwise use base event
+      const eventToUse = resourceEvent || baseEvent;
+      
+      // Create extended event with rootMessageObject
+      eventInfo = {
+        ...eventToUse,
+        rootMessageObject: messageObject
+      };
+      
+      // Add event-specific information to the message
+      title = `New ${eventToUse.eventName || 'Webhook'} Event`;
+      
+      // Build a more detailed message
+      const detailParts = [];
+      
+      // Include event name if available
+      if (eventToUse.eventName) {
+        detailParts.push(`Type: ${eventToUse.eventName}`);
+      }
+      
+      // Include message content if available
+      if (messageObject?.content?.value) {
+        detailParts.push(`Content: ${messageObject.content.value}`);
+      }
+      
+      // Add resource information if available
+      if (resourceEvent?.data?.fields) {
+        const resourceField = resourceEvent.data.fields.find((field: Field) => 
+          field.type_name === 'ResourceAddress' && field.kind === 'Reference'
+        );
+        if (resourceField?.value) {
+          detailParts.push(`Resource: ${resourceField.value}`);
+        }
+      }
+      
+      // Add webhook details
+      detailParts.push(`Method: ${webhookEvent.method}`);
+      detailParts.push(`Endpoint: ${webhookEvent.path}`);
+      detailParts.push(`ID: ${webhookEvent.query.id || 'none'}`);
+      detailParts.push(`Time: ${new Date(webhookEvent.timestamp).toLocaleString()}`);
+      
+      // Combine all details into a message
+      message = detailParts.join('\n');
+    }
+  }
+  
+  return { title, message, eventInfo };
+}
+
 // Function to add a new toast notification from a webhook event
 export function addToast(webhookEvent: WebhookEvent) {
   console.log('ADD TOAST: Processing webhook event', webhookEvent.id);
   
-  // Only add toast for webhook events with proper structure
-  if (!webhookEvent.body || typeof webhookEvent.body !== 'object' || !('events' in webhookEvent.body)) {
-    console.log('ADD TOAST: Invalid webhook body structure, missing events array');
-    return;
-  }
+  // Use the shared notification generator
+  const { eventInfo, title, message } = generateNotificationMessage(webhookEvent);
   
-  const payload = webhookEvent.body as { 
-    events: WebhookEventData[],
-    message?: MessageObject
-  };
-  
-  // Extract the message object to pass to the notification
-  const messageObject = payload.message;
-  console.log('ADD TOAST: Extracted message object:', JSON.stringify(messageObject, null, 2));
-  
-  // Make sure we have events
-  if (payload.events && payload.events.length > 0) {
-    // Get the base event (first event)
-    const baseEvent = payload.events[0];
-    console.log('ADD TOAST: Base event:', baseEvent.eventName);
-    
-    // Find the first event with a ResourceAddress field if it exists
-    // This helps ensure we show resource info in the notification
-    const resourceEvent = payload.events.find(event => {
-      if (event.data?.fields) {
-        return event.data.fields.some((field: Field) => 
-          field.type_name === 'ResourceAddress' && 
-          field.kind === 'Reference' && 
-          field.value && 
-          field.value.startsWith('resource_')
-        );
-      }
-      return false;
-    });
-    
-    // Use resource event if found, otherwise use base event
-    const eventToUse = resourceEvent || baseEvent;
-    console.log('ADD TOAST: Using event for notification:', eventToUse.eventName);
-    
-    // Create extended event with rootMessageObject
-    const extendedEvent: ExtendedWebhookEventData = {
-      ...eventToUse,
-      rootMessageObject: messageObject
-    };
-    
-    if (extendedEvent.rootMessageObject?.content?.value) {
-      console.log('ADD TOAST: Message content value is available:', extendedEvent.rootMessageObject.content.value);
-    } else {
-      console.log('ADD TOAST: No message content value available in rootMessageObject');
-    }
-    
+  // Only proceed if we have event info
+  if (eventInfo) {
     const toastId = generateUniqueId();
     
     toasts.update(currentToasts => {
       const newToast: ToastNotification = {
         id: toastId,
-        event: extendedEvent,
+        event: eventInfo,
         timestamp: webhookEvent.timestamp,
         read: false,
         visible: true
       };
       
       // Log the event in the toast before adding
-      console.log('ADD TOAST: Created toast with event ID:', extendedEvent.eventName);
+      console.log('ADD TOAST: Created toast notification', title);
       
       // Add new toast to the beginning of the array
       return [newToast, ...currentToasts].slice(0, 10); // Keep only the 10 most recent toasts
@@ -127,8 +170,11 @@ export function addToast(webhookEvent: WebhookEvent) {
     setTimeout(() => {
       dismissToastById(toastId);
     }, TOAST_DISPLAY_TIME);
+    
+    return { toastId, title, message, eventInfo };
   } else {
-    console.log('ADD TOAST: No events found in webhook payload');
+    console.log('ADD TOAST: Could not generate notification from event data');
+    return null;
   }
 }
 
