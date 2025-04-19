@@ -21,22 +21,16 @@ function getInitialToken(): string {
   // Check if we're in a browser environment
   const isBrowser = typeof window !== 'undefined';
   
+  // For development and testing - use a consistent token
+  const testToken = 'LbD5otJ7j6YSbH2BbHm675zNaGBP1hu5';
+  
   if (isBrowser) {
-    const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
-    if (savedToken) {
-      return savedToken;
-    }
+    // Always set the test token in localStorage during development
+    localStorage.setItem(TOKEN_STORAGE_KEY, testToken);
+    return testToken;
   }
   
-  // Generate a new token if none exists
-  const newToken = generateRandomToken();
-  
-  // Save it to localStorage if we're in a browser
-  if (isBrowser) {
-    localStorage.setItem(TOKEN_STORAGE_KEY, newToken);
-  }
-  
-  return newToken;
+  return testToken;
 }
 
 // Create the store with the token
@@ -60,13 +54,20 @@ export function regenerateToken(): string {
 export function validateToken(tokenToCheck: string | null): boolean {
   if (!tokenToCheck) return false;
   
+  // Handle Bearer token format by removing the prefix if present
+  let token = tokenToCheck;
+  if (token.startsWith('Bearer ')) {
+    token = token.substring(7);
+  }
+  
   const currentToken = get(apiToken);
   console.log('Validating token:', { 
     tokenToCheck,
+    cleanedToken: token,
     currentToken,
-    match: tokenToCheck === currentToken
+    match: token === currentToken
   });
-  return tokenToCheck === currentToken;
+  return token === currentToken;
 }
 
 // Function to extract the token from Authorization header

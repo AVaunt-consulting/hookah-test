@@ -2,7 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { ProgrammaticScryptoSborValue } from '$lib/types/sbor';
 import { validateWebhookPayload } from '$lib/validation/schema';
-import { validateToken } from '$lib/stores/authStore';
+import { validateToken, apiToken } from '$lib/stores/authStore';
+import { get } from 'svelte/store';
 
 // Store for webhook events (would use a database in production)
 let webhookEvents: WebhookEvent[] = [];
@@ -54,14 +55,38 @@ export const POST: RequestHandler = async ({ request, url }) => {
   // Check authorization header if not in test mode
   if (!url.searchParams.has('test')) {
     // Get authorization header
-    const authToken = request.headers.get('Authorization') || request.headers.get('authorization');
+    const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
     
-    // Validate the token directly
-    if (!validateToken(authToken)) {
+    // Debug logging
+    console.log('Authorization header:', authHeader);
+    
+    if (!authHeader) {
+      console.log('No authorization header provided');
       return json(
         { 
           success: false, 
-          error: 'Unauthorized. Please provide a valid API token in the Authorization header.'
+          error: 'Unauthorized. Please provide your API token in the Authorization header.'
+        }, 
+        { status: 401 }
+      );
+    }
+    
+    // Extract token - handle both plain token and Bearer format
+    let token = authHeader;
+    // If it starts with 'Bearer ', remove that prefix
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+    
+    console.log('Extracted token:', token);
+    console.log('Expected token:', get(apiToken));
+    
+    // Validate the token
+    if (!validateToken(token)) {
+      return json(
+        { 
+          success: false, 
+          error: `Unauthorized. Invalid API token provided. Expected: ${get(apiToken)}, Received: ${token}`
         }, 
         { status: 401 }
       );
