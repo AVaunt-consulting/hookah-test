@@ -112,7 +112,7 @@ export function generateNotificationMessage(webhookEvent: WebhookEvent): {
       
       // Include message content if available
       if (messageObject?.content?.value) {
-        detailParts.push(`Content: ${messageObject.content.value}`);
+        detailParts.push(`Memo: ${messageObject.content.value}`);
       }
       
       // Add amount information if available

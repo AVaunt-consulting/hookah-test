@@ -247,12 +247,18 @@
     
     <div class="flex flex-col space-y-6">
       <!-- Email Notifications -->
-      <div class="border dark:border-gray-700 rounded-lg p-4">
+      <div class="border dark:border-gray-700 rounded-lg p-4 opacity-60 relative">
+        <div class="absolute inset-0 bg-gray-100 dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-50 flex items-center justify-center">
+          <div class="bg-white dark:bg-gray-700 px-4 py-2 rounded-lg shadow border border-gray-300 dark:border-gray-600">
+            <span class="text-gray-700 dark:text-gray-300 font-medium">Currently Inactive</span>
+          </div>
+        </div>
         <div class="flex items-center mb-4">
           <input 
             type="checkbox" 
             id="email-toggle" 
             bind:checked={emailEnabled}
+            disabled
             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
           />
           <label for="email-toggle" class="ml-2 text-lg font-medium text-gray-900 dark:text-white">Email Notifications</label>
@@ -264,6 +270,7 @@
             type="email" 
             id="email" 
             bind:value={emailAddress}
+            disabled
             placeholder="your.email@example.com" 
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
@@ -271,40 +278,34 @@
         
         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <button 
-            on:click={saveEmailSettings}
-            disabled={!emailAddress || isTestingEmail}
+            disabled
             class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             Save Email Settings
           </button>
           
           <button 
-            on:click={testEmailNotification}
-            disabled={!emailAddress || isTestingEmail}
+            disabled
             class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
-            {isTestingEmail ? 'Sending...' : 'Test Email Notification'}
+            Test Email Notification
           </button>
         </div>
-        
-        {#if emailSaveSuccess}
-          <p class="mt-2 text-green-600 dark:text-green-400 text-sm">Settings saved successfully!</p>
-        {/if}
-        
-        {#if testEmailResult}
-          <p class="mt-2 text-sm {testEmailResult.includes('Error') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}">
-            {testEmailResult}
-          </p>
-        {/if}
       </div>
       
       <!-- SMS Notifications -->
-      <div class="border dark:border-gray-700 rounded-lg p-4">
+      <div class="border dark:border-gray-700 rounded-lg p-4 opacity-60 relative">
+        <div class="absolute inset-0 bg-gray-100 dark:bg-gray-800 bg-opacity-50 dark:bg-opacity-50 flex items-center justify-center">
+          <div class="bg-white dark:bg-gray-700 px-4 py-2 rounded-lg shadow border border-gray-300 dark:border-gray-600">
+            <span class="text-gray-700 dark:text-gray-300 font-medium">Currently Inactive</span>
+          </div>
+        </div>
         <div class="flex items-center mb-4">
           <input 
             type="checkbox" 
             id="sms-toggle" 
             bind:checked={smsEnabled}
+            disabled
             class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
           />
           <label for="sms-toggle" class="ml-2 text-lg font-medium text-gray-900 dark:text-white">SMS Notifications</label>
@@ -316,6 +317,7 @@
             type="tel" 
             id="phone" 
             bind:value={phoneNumber}
+            disabled
             placeholder="+1234567890" 
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
           />
@@ -324,31 +326,19 @@
         
         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <button 
-            on:click={saveSmsSettings}
-            disabled={!phoneNumber || isTestingSms}
+            disabled
             class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
             Save SMS Settings
           </button>
           
           <button 
-            on:click={testSmsNotification}
-            disabled={!phoneNumber || isTestingSms}
+            disabled
             class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
           >
-            {isTestingSms ? 'Sending...' : 'Test SMS Notification'}
+            Test SMS Notification
           </button>
         </div>
-        
-        {#if smsSaveSuccess}
-          <p class="mt-2 text-green-600 dark:text-green-400 text-sm">Settings saved successfully!</p>
-        {/if}
-        
-        {#if testSmsResult}
-          <p class="mt-2 text-sm {testSmsResult.includes('Error') ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}">
-            {testSmsResult}
-          </p>
-        {/if}
       </div>
       
       <!-- Telegram Notifications -->
@@ -416,8 +406,14 @@
     
     <div class="space-y-4 text-gray-700 dark:text-gray-300 text-sm sm:text-base">
       <p>
-        When a new webhook event is received, you can be notified via email, SMS, and/or Telegram depending on your settings above.
+        When a new webhook event is received, you can be notified through Telegram. Currently, only Telegram notifications are supported and active.
       </p>
+      
+      <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 rounded mb-4">
+        <p class="text-yellow-800 dark:text-yellow-200">
+          <strong>Note:</strong> Email and SMS notifications are currently not available. Please use Telegram for receiving webhook notifications.
+        </p>
+      </div>
       
       <div class="bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 rounded">
         <p class="text-blue-800 dark:text-blue-200">
@@ -426,7 +422,7 @@
         <ul class="list-disc pl-5 mt-2 space-y-1 text-blue-800 dark:text-blue-200">
           <li>Email: SendGrid, Mailgun, Amazon SES</li>
           <li>SMS: Twilio, Vonage (Nexmo)</li>
-          <li>Telegram: Official Telegram Bot API</li>
+          <li>Telegram: Official Telegram Bot API (currently active)</li>
         </ul>
       </div>
       
@@ -435,8 +431,10 @@
       </p>
       
       <ul class="list-disc pl-5 space-y-1">
-        <li>HTTP method used (GET, POST, etc.)</li>
-        <li>Webhook path</li>
+        <li>Event type</li>
+        <li>Memo information (if available)</li>
+        <li>Amount (if available)</li>
+        <li>Resource information</li>
         <li>Timestamp</li>
         <li>Webhook ID</li>
       </ul>
