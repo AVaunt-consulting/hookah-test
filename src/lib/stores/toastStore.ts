@@ -60,7 +60,7 @@ export function generateNotificationMessage(webhookEvent: WebhookEvent): {
   // Default return values
   let eventInfo: ExtendedWebhookEventData | null = null;
   let title = 'New Webhook Event';
-  let message = `Received ${webhookEvent.method} request at ${new Date(webhookEvent.timestamp).toLocaleString()}`;
+  let message = `Received request at ${new Date(webhookEvent.timestamp).toLocaleString()}`;
   
   // Process event data if it exists
   if (webhookEvent.body && typeof webhookEvent.body === 'object' && 'events' in webhookEvent.body) {
@@ -115,6 +115,14 @@ export function generateNotificationMessage(webhookEvent: WebhookEvent): {
         detailParts.push(`Content: ${messageObject.content.value}`);
       }
       
+      // Add amount information if available
+      const amountField = eventToUse.data?.fields?.find((field: Field) => 
+        field.field_name === 'amount' || field.kind === 'Decimal'
+      );
+      if (amountField?.value) {
+        detailParts.push(`Amount: ${amountField.value}`);
+      }
+      
       // Add resource information if available
       if (resourceEvent?.data?.fields) {
         const resourceField = resourceEvent.data.fields.find((field: Field) => 
@@ -125,9 +133,7 @@ export function generateNotificationMessage(webhookEvent: WebhookEvent): {
         }
       }
       
-      // Add webhook details
-      detailParts.push(`Method: ${webhookEvent.method}`);
-      detailParts.push(`Endpoint: ${webhookEvent.path}`);
+      // Add webhook ID and timestamp (removed Method and Endpoint as requested)
       detailParts.push(`ID: ${webhookEvent.query.id || 'none'}`);
       detailParts.push(`Time: ${new Date(webhookEvent.timestamp).toLocaleString()}`);
       
