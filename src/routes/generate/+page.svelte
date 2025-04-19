@@ -55,7 +55,7 @@
       ]
     };
     
-    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -H "Authorization: Bearer ${$apiToken}" -d '${JSON.stringify(examplePayload)}'`;
+    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -H "Authorization: ${$apiToken}" -d '${JSON.stringify(examplePayload)}'`;
   }
 
   function copyToClipboard() {
@@ -94,7 +94,7 @@
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer ${token}'
+    'Authorization': '${token}'
   },
   body: JSON.stringify({
     eventWatcherId: "watch_123456789",
@@ -124,7 +124,7 @@ response = requests.post(
     '${window.location.origin}/api/webhook',
     headers={
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${token}'
+        'Authorization': '${token}'
     },
     json={
         'eventWatcherId': 'watch_123456789',
@@ -205,7 +205,7 @@ response = requests.post(
     
     <div class="mb-6 bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 rounded">
       <p class="text-blue-800 dark:text-blue-200 text-sm sm:text-base">
-        <strong>Important:</strong> API token authentication is required for all webhook endpoints. Make sure to include your API token in the <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">Authorization</code> header with all requests.
+        <strong>Important:</strong> API token authentication is required for all webhook endpoints. Use your API token directly as the value for the <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">Authorization</code> header with all requests.
       </p>
     </div>
     
@@ -285,7 +285,7 @@ response = requests.post(
       
       <div class="mt-2 mb-4">
         <p class="text-sm text-gray-600 dark:text-gray-400 italic">
-          Note: Authentication is bypassed with the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">test=true</code> parameter included in your URL. For secure endpoints, remove this parameter and add the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header.
+          Note: When the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">test=true</code> parameter is included in your URL, authentication is bypassed. For secure endpoints, remove this parameter and add your API token directly in the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header.
         </p>
       </div>
       
@@ -303,7 +303,7 @@ response = requests.post(
       <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Code Examples</h2>
       
       <div class="mb-3 text-sm text-gray-600 dark:text-gray-400 italic">
-        <p>Note: These examples include the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">test=true</code> parameter to bypass authentication. For secure endpoints, remove this parameter and use the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header with your token.</p>
+        <p>Note: These examples show how to use your API token directly as the Authorization header value. The <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">test=true</code> parameter can be added to the URL to bypass authentication during testing.</p>
       </div>
       
       <div class="space-y-6">
@@ -331,7 +331,7 @@ response = requests.post(
       </p>
       
       <div class="bg-gray-100 dark:bg-gray-900 p-3 sm:p-4 rounded overflow-x-auto">
-        <pre class="text-xs sm:text-sm text-gray-800 dark:text-gray-300 whitespace-pre-wrap sm:whitespace-pre">{`curl -X POST ${window.location.origin}/api/webhook -H "Content-Type: application/json" -H "Authorization: Bearer ${$apiToken}" -d '${JSON.stringify({
+        <pre class="text-xs sm:text-sm text-gray-800 dark:text-gray-300 whitespace-pre-wrap sm:whitespace-pre">{`curl -X POST ${window.location.origin}/api/webhook -H "Content-Type: application/json" -H "Authorization: ${$apiToken}" -d '${JSON.stringify({
   eventWatcherId: "watch_123456789",
   transactionId: "tx_abcdef1234567890",
   events: [
@@ -357,7 +357,7 @@ response = requests.post(
       
       <div class="mt-4 flex justify-end">
         <button 
-          on:click={() => navigator.clipboard.writeText(`curl -X POST ${window.location.origin}/api/webhook -H "Content-Type: application/json" -H "Authorization: Bearer ${$apiToken}" -d '${JSON.stringify({
+          on:click={() => navigator.clipboard.writeText(`curl -X POST ${window.location.origin}/api/webhook -H "Content-Type: application/json" -H "Authorization: ${$apiToken}" -d '${JSON.stringify({
   eventWatcherId: "watch_123456789",
   transactionId: "tx_abcdef1234567890",
   events: [

@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import type { ProgrammaticScryptoSborValue } from '$lib/types/sbor';
 import { validateWebhookPayload } from '$lib/validation/schema';
-import { validateAuthHeader } from '$lib/stores/authStore';
+import { validateToken } from '$lib/stores/authStore';
 
 // Store for webhook events (would use a database in production)
 let webhookEvents: WebhookEvent[] = [];
@@ -53,15 +53,15 @@ export const POST: RequestHandler = async ({ request, url }) => {
   
   // Check authorization header if not in test mode
   if (!url.searchParams.has('test')) {
-    // Get authorization header (case-insensitive)
-    const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
+    // Get authorization header
+    const authToken = request.headers.get('Authorization') || request.headers.get('authorization');
     
-    // Validate the authorization header
-    if (!validateAuthHeader(authHeader)) {
+    // Validate the token directly
+    if (!validateToken(authToken)) {
       return json(
         { 
           success: false, 
-          error: 'Unauthorized. Please provide a valid Bearer token in the Authorization header.'
+          error: 'Unauthorized. Please provide a valid API token in the Authorization header.'
         }, 
         { status: 401 }
       );
