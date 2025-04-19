@@ -1,8 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { apiToken, regenerateToken } from '$lib/stores/authStore';
   
   let webhookUrl = '';
   let copied = false;
+  let tokenCopied = false;
+  let tokenRegenerated = false;
   let uniqueId = '';
   let curlCommand = '';
   let isUrlGenerated = false;
@@ -52,7 +55,7 @@
       ]
     };
     
-    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -d '${JSON.stringify(examplePayload)}'`;
+    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -H "Authorization: Bearer ${$apiToken}" -d '${JSON.stringify(examplePayload)}'`;
   }
 
   function copyToClipboard() {
@@ -62,6 +65,86 @@
         copied = false;
       }, 2000);
     });
+  }
+  
+  // Copy token to clipboard
+  function copyToken() {
+    navigator.clipboard.writeText($apiToken);
+    tokenCopied = true;
+    setTimeout(() => {
+      tokenCopied = false;
+    }, 2000);
+  }
+  
+  // Regenerate token
+  function handleRegenerateToken() {
+    if (confirm('Are you sure you want to regenerate your API token? This will invalidate the current token.')) {
+      regenerateToken();
+      tokenRegenerated = true;
+      updateCurlCommand();
+      setTimeout(() => {
+        tokenRegenerated = false;
+      }, 2000);
+    }
+  }
+  
+  // Format examples with the current token
+  function getNodeJsExample(token: string): string {
+    return `const response = await fetch('${window.location.origin}/api/webhook', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ${token}'
+  },
+  body: JSON.stringify({
+    eventWatcherId: "watch_123456789",
+    transactionId: "tx_abcdef1234567890",
+    events: [
+      {
+        data: {
+          type: "Decimal",
+          value: "123.456"
+        },
+        emitter: {
+          globalEmitter: "global_address_123",
+          methodEmitter: "method_001",
+          outerEmitter: "outer_001"
+        },
+        eventName: "TokenTransfer"
+      }
+    ]
+  })
+});`;
+  }
+  
+  function getPythonExample(token: string): string {
+    return `import requests
+
+response = requests.post(
+    '${window.location.origin}/api/webhook',
+    headers={
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${token}'
+    },
+    json={
+        'eventWatcherId': 'watch_123456789',
+        'transactionId': 'tx_abcdef1234567890',
+        'events': [
+            {
+                'data': {
+                    'type': 'Decimal',
+                    'value': '123.456'
+                },
+                'emitter': {
+                    'globalEmitter': 'global_address_123',
+                    'methodEmitter': 'method_001',
+                    'outerEmitter': 'outer_001'
+                },
+                'eventName': 'TokenTransfer'
+            }
+        ]
+    }
+)`;
   }
 </script>
 
@@ -117,18 +200,59 @@
     {/if}
   </div>
 
+  <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
+    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">API Authentication Token</h2>
+    
+    <div class="mb-6 bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 rounded">
+      <p class="text-blue-800 dark:text-blue-200 text-sm sm:text-base">
+        <strong>Important:</strong> Your webhook API requires authentication. Use this token in the Authorization header when sending webhook events.
+      </p>
+    </div>
+    
+    <div class="mb-6">
+      <label for="api-token" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">API Token</label>
+      <div class="flex flex-col sm:flex-row">
+        <input 
+          type="text" 
+          id="api-token" 
+          value={$apiToken} 
+          readonly
+          class="w-full px-3 py-2 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg sm:rounded-l-lg sm:rounded-r-none bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base mb-2 sm:mb-0"
+        />
+        <button 
+          on:click={copyToken}
+          class="w-full sm:w-auto px-3 py-2 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg sm:rounded-l-none sm:rounded-r-lg transition duration-150 ease-in-out text-sm sm:text-base"
+        >
+          {tokenCopied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+    </div>
+    
+    <div class="mb-6">
+      <button 
+        on:click={handleRegenerateToken}
+        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition duration-150 ease-in-out text-sm sm:text-base"
+      >
+        {tokenRegenerated ? 'Token Regenerated!' : 'Regenerate Token'}
+      </button>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        Regenerating your token will invalidate the current one. You'll need to update all services using this token.
+      </p>
+    </div>
+  </div>
+
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
     <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">How to use your webhook URL</h2>
     
     <ol class="list-decimal list-inside space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-gray-300">
       <li>
-        <strong>Copy your unique webhook URL</strong>
-        <p class="mt-1 ml-4 sm:ml-6">Use the button above to copy your webhook URL to the clipboard.</p>
+        <strong>Copy your unique webhook URL and API token</strong>
+        <p class="mt-1 ml-4 sm:ml-6">Use the buttons above to copy your webhook URL and authentication token.</p>
       </li>
       
       <li>
         <strong>Configure your service</strong>
-        <p class="mt-1 ml-4 sm:ml-6">Set up the service you want to test to send webhooks to this URL.</p>
+        <p class="mt-1 ml-4 sm:ml-6">Set up the service you want to test to send webhooks to this URL with the token in the Authorization header.</p>
       </li>
       
       <li>
@@ -166,6 +290,26 @@
         >
           Copy Curl Command
         </button>
+      </div>
+    </div>
+    
+    <div class="mt-6 sm:mt-8 bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+      <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Code Examples</h2>
+      
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-lg font-medium mb-2 text-gray-900 dark:text-white">Node.js Example</h3>
+          <div class="bg-gray-100 dark:bg-gray-900 p-3 sm:p-4 rounded overflow-x-auto">
+            <pre class="text-xs sm:text-sm text-gray-800 dark:text-gray-300 whitespace-pre-wrap sm:whitespace-pre">{getNodeJsExample($apiToken)}</pre>
+          </div>
+        </div>
+        
+        <div>
+          <h3 class="text-lg font-medium mb-2 text-gray-900 dark:text-white">Python Example</h3>
+          <div class="bg-gray-100 dark:bg-gray-900 p-3 sm:p-4 rounded overflow-x-auto">
+            <pre class="text-xs sm:text-sm text-gray-800 dark:text-gray-300 whitespace-pre-wrap sm:whitespace-pre">{getPythonExample($apiToken)}</pre>
+          </div>
+        </div>
       </div>
     </div>
   {/if}
