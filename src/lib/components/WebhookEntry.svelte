@@ -85,29 +85,29 @@
   const resourceAddresses = extractResourceAddresses(event);
 </script>
 
-<div class="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
   <div 
-    class="bg-gray-100 dark:bg-gray-700 px-4 py-3 flex justify-between items-center cursor-pointer"
+    class="bg-gray-100 dark:bg-gray-700 px-3 sm:px-4 py-2 sm:py-3 flex flex-wrap sm:flex-nowrap justify-between items-center cursor-pointer"
     on:click={toggleExpanded}
     on:keydown={handleKeyDown}
     role="button"
     tabindex="0"
     aria-expanded={expanded}
   >
-    <div>
-      <span class="font-mono text-sm px-2 py-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 mr-2">
+    <div class="w-full sm:w-auto mb-1 sm:mb-0">
+      <span class="font-mono text-xs sm:text-sm px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 mr-1 sm:mr-2">
         {event.method}
       </span>
-      <span class="font-mono text-sm text-gray-700 dark:text-gray-300">
+      <span class="font-mono text-xs sm:text-sm text-gray-700 dark:text-gray-300 break-all">
         {event.path}
       </span>
     </div>
-    <div class="flex items-center">
-      <div class="text-sm text-gray-600 dark:text-gray-400 mr-3">
+    <div class="flex items-center w-full sm:w-auto justify-end">
+      <div class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mr-2 sm:mr-3">
         {formatDate(event.timestamp)}
       </div>
       <svg 
-        class="w-5 h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 {expanded ? 'transform rotate-180' : ''}" 
+        class="w-4 h-4 sm:w-5 sm:h-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 {expanded ? 'transform rotate-180' : ''}" 
         fill="none" 
         stroke="currentColor" 
         viewBox="0 0 24 24"
@@ -119,11 +119,11 @@
   </div>
   
   {#if expanded}
-    <div class="p-4">
+    <div class="p-3 sm:p-4">
       {#if resourceAddresses.length > 0}
-        <div class="mb-4">
-          <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Resource Information</h3>
-          <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded overflow-x-auto">
+        <div class="mb-3 sm:mb-4">
+          <h3 class="text-base sm:text-lg font-semibold mb-1 sm:mb-2 text-gray-900 dark:text-white">Resource Information</h3>
+          <div class="bg-gray-50 dark:bg-gray-900 p-2 sm:p-3 rounded overflow-x-auto">
             <div class="space-y-2">
               {#each resourceAddresses as resourceAddress}
                 <ResourceInfo {resourceAddress} />
@@ -133,22 +133,22 @@
         </div>
       {/if}
     
-      <div class="mb-4">
-        <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Headers</h3>
-        <pre class="bg-gray-50 dark:bg-gray-900 p-3 rounded overflow-x-auto text-sm text-gray-800 dark:text-gray-300">{formatJson(event.headers)}</pre>
+      <div class="mb-3 sm:mb-4">
+        <h3 class="text-base sm:text-lg font-semibold mb-1 sm:mb-2 text-gray-900 dark:text-white">Headers</h3>
+        <pre class="bg-gray-50 dark:bg-gray-900 p-2 sm:p-3 rounded overflow-x-auto text-xs sm:text-sm text-gray-800 dark:text-gray-300">{formatJson(event.headers)}</pre>
       </div>
       
       {#if Object.keys(event.query).length > 0}
-        <div class="mb-4">
-          <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Query Parameters</h3>
-          <pre class="bg-gray-50 dark:bg-gray-900 p-3 rounded overflow-x-auto text-sm text-gray-800 dark:text-gray-300">{formatJson(event.query)}</pre>
+        <div class="mb-3 sm:mb-4">
+          <h3 class="text-base sm:text-lg font-semibold mb-1 sm:mb-2 text-gray-900 dark:text-white">Query Parameters</h3>
+          <pre class="bg-gray-50 dark:bg-gray-900 p-2 sm:p-3 rounded overflow-x-auto text-xs sm:text-sm text-gray-800 dark:text-gray-300">{formatJson(event.query)}</pre>
         </div>
       {/if}
       
       {#if event.body}
         <div>
-          <h3 class="text-lg font-semibold mb-2 text-gray-900 dark:text-white">Body</h3>
-          <pre class="bg-gray-50 dark:bg-gray-900 p-3 rounded overflow-x-auto text-sm text-gray-800 dark:text-gray-300">{formatJson(event.body)}</pre>
+          <h3 class="text-base sm:text-lg font-semibold mb-1 sm:mb-2 text-gray-900 dark:text-white">Body</h3>
+          <pre class="bg-gray-50 dark:bg-gray-900 p-2 sm:p-3 rounded overflow-x-auto text-xs sm:text-sm text-gray-800 dark:text-gray-300">{formatJson(event.body)}</pre>
         </div>
       {/if}
     </div>

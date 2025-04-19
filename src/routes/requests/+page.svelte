@@ -49,48 +49,50 @@
   }
 </script>
 
-<div class="max-w-6xl mx-auto">
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Webhook Requests</h1>
+<div class="max-w-6xl mx-auto p-3 sm:p-4">
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-3 sm:gap-0">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-0">Webhook Requests</h1>
     
-    <div class="flex space-x-4">
+    <div class="flex flex-col sm:flex-row sm:space-x-4 w-full sm:w-auto space-y-2 sm:space-y-0">
       <button 
         on:click={togglePolling}
-        class="px-4 py-2 {pollingEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'} text-white font-medium rounded-lg shadow-md transition duration-150 ease-in-out flex items-center"
+        class="px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base {pollingEnabled ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'} text-white font-medium rounded-lg shadow-md transition duration-150 ease-in-out flex items-center justify-center sm:justify-start"
       >
-        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
         </svg>
         {pollingEnabled ? 'Auto Refresh: ON' : 'Auto Refresh: OFF'}
       </button>
       
-      <button 
-        on:click={fetchWebhookEvents}
-        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition duration-150 ease-in-out"
-      >
-        Refresh
-      </button>
-      
-      <button 
-        on:click={clearWebhookEvents}
-        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md transition duration-150 ease-in-out"
-      >
-        Clear All
-      </button>
+      <div class="flex space-x-2 sm:space-x-4">
+        <button 
+          on:click={fetchWebhookEvents}
+          class="flex-1 sm:flex-none px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition duration-150 ease-in-out"
+        >
+          Refresh
+        </button>
+        
+        <button 
+          on:click={clearWebhookEvents}
+          class="flex-1 sm:flex-none px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg shadow-md transition duration-150 ease-in-out"
+        >
+          Clear All
+        </button>
+      </div>
     </div>
   </div>
 
   {#if filterId}
-    <div class="mb-6 bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+    <div class="mb-4 sm:mb-6 bg-blue-50 dark:bg-blue-900 p-3 sm:p-4 rounded-lg text-sm sm:text-base">
       <p class="text-blue-800 dark:text-blue-200">
-        Filtering requests with ID: <span class="font-mono font-bold">{filterId}</span>
+        Filtering requests with ID: <span class="font-mono font-bold break-all">{filterId}</span>
         <a href="/requests" class="ml-2 text-blue-600 dark:text-blue-400 underline">Clear filter</a>
       </p>
     </div>
   {/if}
 
   {#if $error}
-    <div class="mb-6 bg-red-50 dark:bg-red-900 p-4 rounded-lg">
+    <div class="mb-4 sm:mb-6 bg-red-50 dark:bg-red-900 p-3 sm:p-4 rounded-lg text-sm sm:text-base">
       <p class="text-red-800 dark:text-red-200">{$error}</p>
     </div>
   {/if}
@@ -100,9 +102,9 @@
       <div class="text-gray-600 dark:text-gray-400">Loading webhook events...</div>
     </div>
   {:else if filteredEvents.length === 0}
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 text-center">
-      <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">No webhook requests yet</h2>
-      <p class="text-gray-700 dark:text-gray-300">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 text-center">
+      <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">No webhook requests yet</h2>
+      <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300">
         Try sending a request to your webhook URL to see it appear here.
       </p>
       <div class="mt-4">
@@ -110,7 +112,7 @@
       </div>
     </div>
   {:else}
-    <div class="space-y-4">
+    <div class="space-y-3 sm:space-y-4">
       {#each filteredEvents as event (event.id)}
         <WebhookEntry {event} />
       {/each}
