@@ -22,18 +22,10 @@ function getInitialToken(): string {
   const isBrowser = typeof window !== 'undefined';
   
   if (isBrowser) {
-    // For testing - hardcode the token to match what the user is testing with
-    const testToken = 'LbD5otJ7j6YSbH2BbHm675zNaGBP1hu5';
-    localStorage.setItem(TOKEN_STORAGE_KEY, testToken);
-    return testToken;
-    
-    // Original code
-    /*
     const savedToken = localStorage.getItem(TOKEN_STORAGE_KEY);
     if (savedToken) {
       return savedToken;
     }
-    */
   }
   
   // Generate a new token if none exists

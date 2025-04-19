@@ -16,7 +16,7 @@
     if (savedUniqueId) {
       uniqueId = savedUniqueId;
       const baseUrl = window.location.origin;
-      webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}&test=true`;
+      webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
       updateCurlCommand();
       isUrlGenerated = true;
     }
@@ -25,7 +25,7 @@
   function generateNewUrl() {
     uniqueId = crypto.randomUUID();
     const baseUrl = window.location.origin;
-    webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}&test=true`;
+    webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
     
     // Save to localStorage
     localStorage.setItem('webhookUniqueId', uniqueId);
@@ -55,7 +55,7 @@
       ]
     };
     
-    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -d '${JSON.stringify(examplePayload)}'`;
+    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -H "Authorization: Bearer ${$apiToken}" -d '${JSON.stringify(examplePayload)}'`;
   }
 
   function copyToClipboard() {
@@ -90,7 +90,7 @@
   
   // Format examples with the current token
   function getNodeJsExample(token: string): string {
-    return `const response = await fetch('${window.location.origin}/api/webhook?test=true', {
+    return `const response = await fetch('${window.location.origin}/api/webhook', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -121,7 +121,7 @@
     return `import requests
 
 response = requests.post(
-    '${window.location.origin}/api/webhook?test=true',
+    '${window.location.origin}/api/webhook',
     headers={
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${token}'
@@ -201,11 +201,11 @@ response = requests.post(
   </div>
 
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">API Authentication Token (Optional)</h2>
+    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">API Authentication Token</h2>
     
     <div class="mb-6 bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 rounded">
       <p class="text-blue-800 dark:text-blue-200 text-sm sm:text-base">
-        <strong>Note:</strong> Your webhook URL includes <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">test=true</code> by default, allowing requests without authentication. For secure endpoints in production, remove this parameter and use the API token below with the <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">Authorization</code> header.
+        <strong>Important:</strong> API token authentication is required for all webhook endpoints. Make sure to include your API token in the <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">Authorization</code> header with all requests.
       </p>
     </div>
     
