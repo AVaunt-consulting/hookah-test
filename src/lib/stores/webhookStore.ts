@@ -1,6 +1,7 @@
-import { writable } from 'svelte/store';
+import { writable, get } from 'svelte/store';
 import type { WebhookEvent } from '../../routes/api/webhook/+server';
 import { addToast } from './toastStore';
+import { notificationSettings } from './notificationSettingsStore';
 
 // Local storage key for webhook events
 const STORAGE_KEY = 'webhookEvents';
@@ -60,6 +61,60 @@ webhookEvents.subscribe(events => {
   saveToLocalStorage(events);
 });
 
+// Async function to send a notification
+async function sendExternalNotification(event: WebhookEvent) {
+  const settings = get(notificationSettings);
+  
+  // Skip if notifications are globally disabled
+  if (!settings.enabled) return;
+  
+  try {
+    // Get event info for the notification
+    const eventType = event.method;
+    const path = event.path;
+    const timestamp = new Date(event.timestamp).toLocaleString();
+    const queryId = event.query.id || 'unknown';
+    
+    // Build notification message
+    const message = `New webhook event received:
+Type: ${eventType}
+Path: ${path}
+Time: ${timestamp}
+ID: ${queryId}`;
+
+    // Send email notification if enabled
+    if (settings.email.enabled && settings.email.address) {
+      await fetch('/api/notifications/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: settings.email.address,
+          subject: 'New Webhook Event Received',
+          message,
+        }),
+      });
+    }
+    
+    // Send SMS notification if enabled
+    if (settings.sms.enabled && settings.sms.phoneNumber) {
+      await fetch('/api/notifications/sms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          to: settings.sms.phoneNumber,
+          message,
+        }),
+      });
+    }
+  } catch (error) {
+    console.error('Failed to send notification:', error);
+  }
+}
+
 export async function fetchWebhookEvents() {
   try {
     isLoading.set(true);
@@ -93,6 +148,7 @@ export async function fetchWebhookEvents() {
         // Create toast notifications for new events
         newEvents.forEach((event: WebhookEvent) => {
           addToast(event);
+          sendExternalNotification(event);
         });
       }
     }

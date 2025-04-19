@@ -93,6 +93,7 @@
 					<a href="/generate" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Generate URL</a>
 					<a href="/requests" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Requests</a>
 					<a href="/radix-test" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Radix Test</a>
+					<a href="/notifications" class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Notifications</a>
 				</nav>
 			</div>
 			
@@ -127,6 +128,13 @@
 							on:click={() => mobileMenuOpen = false}
 						>
 							Radix Test
+						</a>
+						<a 
+							href="/notifications" 
+							class="py-2 px-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+							on:click={() => mobileMenuOpen = false}
+						>
+							Notifications
 						</a>
 					</div>
 				</nav>
