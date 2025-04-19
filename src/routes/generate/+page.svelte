@@ -16,7 +16,7 @@
     if (savedUniqueId) {
       uniqueId = savedUniqueId;
       const baseUrl = window.location.origin;
-      webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
+      webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}&test=true`;
       updateCurlCommand();
       isUrlGenerated = true;
     }
@@ -25,7 +25,7 @@
   function generateNewUrl() {
     uniqueId = crypto.randomUUID();
     const baseUrl = window.location.origin;
-    webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}`;
+    webhookUrl = `${baseUrl}/api/webhook?id=${uniqueId}&test=true`;
     
     // Save to localStorage
     localStorage.setItem('webhookUniqueId', uniqueId);
@@ -55,7 +55,7 @@
       ]
     };
     
-    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -H "Authorization: Bearer ${$apiToken}" -d '${JSON.stringify(examplePayload)}'`;
+    curlCommand = `curl -X POST ${webhookUrl} -H "Content-Type: application/json" -d '${JSON.stringify(examplePayload)}'`;
   }
 
   function copyToClipboard() {
@@ -90,7 +90,7 @@
   
   // Format examples with the current token
   function getNodeJsExample(token: string): string {
-    return `const response = await fetch('${window.location.origin}/api/webhook', {
+    return `const response = await fetch('${window.location.origin}/api/webhook?test=true', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -121,7 +121,7 @@
     return `import requests
 
 response = requests.post(
-    '${window.location.origin}/api/webhook',
+    '${window.location.origin}/api/webhook?test=true',
     headers={
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${token}'
@@ -205,7 +205,7 @@ response = requests.post(
     
     <div class="mb-6 bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 rounded">
       <p class="text-blue-800 dark:text-blue-200 text-sm sm:text-base">
-        <strong>Note:</strong> API authentication is optional. You can use this token in the <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">Authorization</code> header for added security, or use the webhook URL without authentication by adding <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">?test=true</code> to your URL.
+        <strong>Note:</strong> Your webhook URL includes <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">test=true</code> by default, allowing requests without authentication. For secure endpoints in production, remove this parameter and use the API token below with the <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">Authorization</code> header.
       </p>
     </div>
     
@@ -285,7 +285,7 @@ response = requests.post(
       
       <div class="mt-2 mb-4">
         <p class="text-sm text-gray-600 dark:text-gray-400 italic">
-          Note: Authentication is optional. You can remove the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header and add <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">?test=true</code> to the URL to bypass authentication.
+          Note: Authentication is bypassed with the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">test=true</code> parameter included in your URL. For secure endpoints, remove this parameter and add the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header.
         </p>
       </div>
       
@@ -303,7 +303,7 @@ response = requests.post(
       <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Code Examples</h2>
       
       <div class="mb-3 text-sm text-gray-600 dark:text-gray-400 italic">
-        <p>Note: These examples include authentication. For testing without a token, remove the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header and add <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">?test=true</code> to the URL.</p>
+        <p>Note: These examples include the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">test=true</code> parameter to bypass authentication. For secure endpoints, remove this parameter and use the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header with your token.</p>
       </div>
       
       <div class="space-y-6">
