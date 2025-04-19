@@ -201,11 +201,11 @@ response = requests.post(
   </div>
 
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-8">
-    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">API Authentication Token</h2>
+    <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">API Authentication Token (Optional)</h2>
     
     <div class="mb-6 bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-400 p-4 rounded">
       <p class="text-blue-800 dark:text-blue-200 text-sm sm:text-base">
-        <strong>Important:</strong> Your webhook API requires authentication. Use this token in the Authorization header when sending webhook events.
+        <strong>Note:</strong> API authentication is optional. You can use this token in the <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">Authorization</code> header for added security, or use the webhook URL without authentication by adding <code class="text-xs sm:text-sm bg-blue-100 dark:bg-blue-800 px-1 py-0.5 rounded">?test=true</code> to your URL.
       </p>
     </div>
     
@@ -236,7 +236,7 @@ response = requests.post(
         {tokenRegenerated ? 'Token Regenerated!' : 'Regenerate Token'}
       </button>
       <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-        Regenerating your token will invalidate the current one. You'll need to update all services using this token.
+        Regenerating your token will invalidate the current one. If you're using token authentication, you'll need to update all services using this token.
       </p>
     </div>
   </div>
@@ -247,12 +247,12 @@ response = requests.post(
     <ol class="list-decimal list-inside space-y-3 sm:space-y-4 text-sm sm:text-base text-gray-700 dark:text-gray-300">
       <li>
         <strong>Copy your unique webhook URL and API token</strong>
-        <p class="mt-1 ml-4 sm:ml-6">Use the buttons above to copy your webhook URL and authentication token.</p>
+        <p class="mt-1 ml-4 sm:ml-6">Use the buttons above to copy your webhook URL and authentication token (if you need secure access).</p>
       </li>
       
       <li>
         <strong>Configure your service</strong>
-        <p class="mt-1 ml-4 sm:ml-6">Set up the service you want to test to send webhooks to this URL with the token in the Authorization header.</p>
+        <p class="mt-1 ml-4 sm:ml-6">Set up the service you want to test to send webhooks to this URL. Add the token in the Authorization header for secure endpoints or append <code class="text-xs sm:text-sm bg-gray-100 dark:bg-gray-700 px-1 py-0.5 rounded">?test=true</code> to your URL to bypass authentication.</p>
       </li>
       
       <li>
@@ -283,6 +283,12 @@ response = requests.post(
         <pre class="text-xs sm:text-sm text-gray-800 dark:text-gray-300 whitespace-pre-wrap sm:whitespace-pre">{curlCommand}</pre>
       </div>
       
+      <div class="mt-2 mb-4">
+        <p class="text-sm text-gray-600 dark:text-gray-400 italic">
+          Note: Authentication is optional. You can remove the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header and add <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">?test=true</code> to the URL to bypass authentication.
+        </p>
+      </div>
+      
       <div class="mt-4 flex justify-end">
         <button 
           on:click={() => navigator.clipboard.writeText(curlCommand)}
@@ -295,6 +301,10 @@ response = requests.post(
     
     <div class="mt-6 sm:mt-8 bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
       <h2 class="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white">Code Examples</h2>
+      
+      <div class="mb-3 text-sm text-gray-600 dark:text-gray-400 italic">
+        <p>Note: These examples include authentication. For testing without a token, remove the <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">Authorization</code> header and add <code class="text-xs bg-gray-200 dark:bg-gray-800 px-1 py-0.5 rounded">?test=true</code> to the URL.</p>
+      </div>
       
       <div class="space-y-6">
         <div>

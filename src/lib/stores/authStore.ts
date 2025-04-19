@@ -68,7 +68,7 @@ export function validateToken(tokenToCheck: string | null): boolean {
 export function extractTokenFromHeader(authHeader: string | null): string | null {
   if (!authHeader) return null;
   
-  // Check if it's a Bearer token
+  // Check if it's a Bearer token (case-insensitive)
   const match = authHeader.match(/^Bearer\s+([A-Za-z0-9+/=._-]+)$/i);
   return match ? match[1] : null;
 }

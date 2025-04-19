@@ -53,7 +53,8 @@ export const POST: RequestHandler = async ({ request, url }) => {
   
   // Check authorization header if not in test mode
   if (!url.searchParams.has('test')) {
-    const authHeader = request.headers.get('authorization');
+    // Get authorization header (case-insensitive)
+    const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
     
     if (!validateAuthHeader(authHeader)) {
       return json(
