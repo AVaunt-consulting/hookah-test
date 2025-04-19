@@ -26,15 +26,18 @@ function extractResourceAddress(message: string): string | null {
 
 // Helper function to extract account address from message
 function extractAccountAddress(message: string): string | null {
-  const accountMatch = message.match(/Account: (account_[a-zA-Z0-9]+\.\.\.)/);
+  // Match the account address pattern - must handle the formatted pattern created in toastStore.ts
+  const accountMatch = message.match(/Account: (account_[a-zA-Z0-9]{11})\.\.\.([a-zA-Z0-9]{5})/);
   if (accountMatch) {
-    // Extract the full address from the truncated form to get the original account
-    const truncatedAccount = accountMatch[1];
-    // Extract first part (before ellipsis)
-    const firstPart = truncatedAccount.substring(0, truncatedAccount.indexOf('...'));
-    if (firstPart.startsWith('account_')) {
-      return firstPart;
-    }
+    // We need to reconstruct a longer form of the address from the parts we have
+    // This is just for basic matching and won't recover the full address,
+    // but will give us enough to format correctly
+    const firstPart = accountMatch[1]; // First 11 chars (including account_)
+    const lastPart = accountMatch[2];  // Last 5 chars
+    
+    // For simplicity, reconstruct an address-like string that we can format correctly
+    // In a real system, you would look up the full address from a database
+    return `${firstPart}${'x'.repeat(10)}${lastPart}`;
   }
   return null;
 }
@@ -80,10 +83,13 @@ async function enhanceMessageWithResourceMetadata(message: string): Promise<stri
   const accountAddress = extractAccountAddress(message);
   if (accountAddress) {
     try {
-      // Format account address more nicely (may add account metadata here in future)
+      // Format account address (ensuring it's first 11 chars + ellipsis + last 5 chars)
+      const formattedAddress = `${accountAddress.substring(0, 11)}...${accountAddress.substring(accountAddress.length - 5)}`;
+      
+      // Replace existing account address reference with correctly formatted one
       enhancedMessage = enhancedMessage.replace(
-        /Account: account_[a-zA-Z0-9]+\.\.\.[a-zA-Z0-9]+/,
-        `Account: ${accountAddress.substring(0, 11)}...${accountAddress.substring(accountAddress.length - 5)}`
+        /Account: account_[a-zA-Z0-9]{11}\.\.\.[a-zA-Z0-9]{5}/,
+        `Account: ${formattedAddress}`
       );
     } catch (error) {
       console.error('Error enhancing account address:', error);
