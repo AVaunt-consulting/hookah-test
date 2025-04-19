@@ -27,26 +27,48 @@
   let testSmsResult = '';
   let testTelegramResult = '';
   
+  let hasError = false;
+  let errorMessage = '';
+  
   // Load settings
   onMount(() => {
-    emailAddress = $notificationSettings.email.address;
-    phoneNumber = $notificationSettings.sms.phoneNumber;
-    telegramChatId = $notificationSettings.telegram.chatId;
-    notificationsEnabled = $notificationSettings.enabled;
-    emailEnabled = $notificationSettings.email.enabled;
-    smsEnabled = $notificationSettings.sms.enabled;
-    telegramEnabled = $notificationSettings.telegram.enabled;
+    try {
+      // Make sure the store is initialized with valid data
+      if ($notificationSettings) {
+        emailAddress = $notificationSettings.email?.address || '';
+        phoneNumber = $notificationSettings.sms?.phoneNumber || '';
+        telegramChatId = $notificationSettings.telegram?.chatId || '';
+        notificationsEnabled = $notificationSettings.enabled || false;
+        emailEnabled = $notificationSettings.email?.enabled || false;
+        smsEnabled = $notificationSettings.sms?.enabled || false;
+        telegramEnabled = $notificationSettings.telegram?.enabled || false;
+      } else {
+        console.error('Notification settings store is not properly initialized');
+        hasError = true;
+        errorMessage = 'Failed to load notification settings. Please try refreshing the page.';
+      }
+    } catch (error) {
+      console.error('Error initializing notification settings:', error);
+      hasError = true;
+      errorMessage = 'An error occurred while loading notification settings.';
+    }
   });
   
   // Subscribe to store changes
   $: {
-    emailAddress = $notificationSettings.email.address;
-    phoneNumber = $notificationSettings.sms.phoneNumber;
-    telegramChatId = $notificationSettings.telegram.chatId;
-    notificationsEnabled = $notificationSettings.enabled;
-    emailEnabled = $notificationSettings.email.enabled;
-    smsEnabled = $notificationSettings.sms.enabled;
-    telegramEnabled = $notificationSettings.telegram.enabled;
+    try {
+      if ($notificationSettings) {
+        emailAddress = $notificationSettings.email?.address || '';
+        phoneNumber = $notificationSettings.sms?.phoneNumber || '';
+        telegramChatId = $notificationSettings.telegram?.chatId || '';
+        notificationsEnabled = $notificationSettings.enabled || false;
+        emailEnabled = $notificationSettings.email?.enabled || false;
+        smsEnabled = $notificationSettings.sms?.enabled || false;
+        telegramEnabled = $notificationSettings.telegram?.enabled || false;
+      }
+    } catch (error) {
+      console.error('Error updating from notification settings store:', error);
+    }
   }
   
   function saveEmailSettings() {
@@ -187,6 +209,14 @@
 
 <div class="max-w-3xl mx-auto p-4">
   <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-gray-900 dark:text-white">Notification Settings</h1>
+  
+  {#if hasError}
+    <div class="bg-red-50 dark:bg-red-900 border-l-4 border-red-500 p-4 mb-6 rounded">
+      <p class="text-red-800 dark:text-red-200">
+        <strong>Error:</strong> {errorMessage}
+      </p>
+    </div>
+  {/if}
   
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6 mb-6">
     <div class="flex items-center justify-between mb-6">
